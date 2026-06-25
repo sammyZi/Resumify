@@ -83,3 +83,50 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* ─── Custom thin scrollbars ─────────────────────────────────────────────── */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+  background-clip: padding-box;
+}
+
+/* ─── Theme View Transition ──────────────────────────────────────────────────
+   The animated theme toggle drives a circular reveal on the new snapshot via
+   the Web Animations API. Disable the default cross-fade so only the custom
+   clip-path animation is visible, and keep the new snapshot on top. */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}

@@ -442,10 +442,6 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
 }
 
 .sectionHeader {
@@ -690,13 +686,8 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  position: sticky;
-  bottom: 1rem;
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
 }
 
 /* ─── Loading / skeleton ─────────────────────────────────────────────────── */
@@ -767,9 +758,13 @@
 
 .galleryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-columns: repeat(auto-fill, 240px);
   justify-content: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
+  /* Break out of the centered content column so larger cards still fit
+     several across on wide screens. */
+  margin-inline: calc(50% - 50vw);
+  padding-inline: 2rem;
 }
 
 .templateCard {
@@ -813,7 +808,7 @@
   top: 0;
   left: 0;
   width: 816px; /* 8.5in at 96dpi */
-  transform: scale(0.245);
+  transform: scale(0.294);
   transform-origin: top left;
   pointer-events: none;
   user-select: none;
