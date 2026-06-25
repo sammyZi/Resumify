@@ -32,16 +32,16 @@ The implementation language is **TypeScript** (Next.js App Router), as specified
     - Generators cover boundary lengths (0/8/200/254/2000), whitespace-only names, exactly 50 vs 51 entries, non-ASCII; assert accept iff all rules hold and rejection lists exactly the violating fields
     - fast-check, ≥100 iterations; tag `Feature: ai-resume-builder, Property 1`
 
-- [ ] 2. Establish Supabase client wiring and database schema
-  - [ ] 2.1 Create Supabase client factories
+- [x] 2. Establish Supabase client wiring and database schema
+  - [x] 2.1 Create Supabase client factories
     - Create `lib/supabase/server.ts` (cookie-bound session client for Route Handlers/Server Components), `lib/supabase/service.ts` (service-role client, server-only, for share resolution), and `lib/supabase/browser.ts`
     - _Requirements: 10.1, 10.2_
 
-  - [ ] 2.2 Author database schema migration
+  - [x] 2.2 Author database schema migration
     - Create SQL migration defining `user_profiles`, `resumes`, `templates`, and `shares` tables with columns and FKs per the design ER model (jsonb for experience/education/skills, `latex_source`, `pdf_path`, share `token`/`kind`/`revoked`)
     - _Requirements: 5.2, 6.5, 7.2, 8.1, 11.1_
 
-  - [ ] 2.3 Author Row-Level Security policies and Storage bucket migration
+  - [x] 2.3 Author Row-Level Security policies and Storage bucket migration
     - Enable RLS and add `auth.uid()`-keyed policies for `user_profiles`, `resumes`, `shares`; add public-read policy for `templates`
     - Create a private Storage bucket for generated PDFs and template preview assets
     - _Requirements: 10.1, 10.2, 7.2_
