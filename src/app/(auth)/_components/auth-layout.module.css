@@ -1,10 +1,85 @@
-/* auth-layout.module.css — centering shell for all auth pages. */
+/* auth-layout.module.css — split-screen shell for all auth pages. */
 
 .shell {
   flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+/* ─── Branded panel (left) ──────────────────────────────────────────────── */
+
+.brand {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+  background-color: #0d1117;
+  background-image:
+    linear-gradient(
+      to bottom,
+      rgba(13, 17, 23, 0.55) 0%,
+      rgba(13, 17, 23, 0.75) 100%
+    ),
+    url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+}
+
+.brandInner {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 30rem;
+}
+
+.brandMark {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fdf6e3;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 4px 24px rgba(0, 0, 0, 0.7);
+}
+
+.brandTagline {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #e8d5b0;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 4px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* ─── Form area (right) ─────────────────────────────────────────────────── */
+
+.content {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
-  background: var(--color-background);
+  padding: 2.5rem 1.5rem;
+  background: #fdf6f0;
+}
+
+.contentInner {
+  width: 100%;
+  max-width: 24rem;
+}
+
+/* ─── Two columns from medium screens up ────────────────────────────────── */
+
+@media (min-width: 60rem) {
+  .shell {
+    grid-template-columns: 1.1fr 1fr;
+  }
+
+  .brand {
+    display: grid;
+  }
 }
