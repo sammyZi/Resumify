@@ -244,3 +244,10 @@
   color: var(--color-text-secondary);
 }
 
+
+.status {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 1rem 0;
+}
