@@ -53,7 +53,7 @@ export default async function TemplateCopyPage({ params }: PageProps) {
           {copyResult.error.message ||
             'Failed to copy the template. Please try again.'}
         </p>
-        <a href={`/t/${token}`} style={styles.link}>
+        <a href={`/t/${token}`} style={styles.retryLink}>
           Try again
         </a>
       </main>
@@ -63,7 +63,7 @@ export default async function TemplateCopyPage({ params }: PageProps) {
   const newResume = copyResult.value
 
   // 5. Success: redirect to the new resume's workspace page.
-  redirect(`/workspace/resumes/${newResume.id}`)
+  redirect(`/resumes/${newResume.id}`)
 }
 
 // ─── Link Unavailable component ───────────────────────────────────────────────
@@ -73,7 +73,8 @@ function LinkUnavailable() {
     <main style={styles.container}>
       <h1 style={styles.heading}>Link unavailable</h1>
       <p style={styles.body}>
-        This share link is no longer valid or does not exist.
+        This template share link has been revoked or does not exist. Please ask
+        the sender for an updated link.
       </p>
     </main>
   )
@@ -92,17 +93,18 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 600,
     marginBottom: '1rem',
+    color: 'var(--color-text-primary, #1a1a1a)',
   },
   body: {
     fontSize: '1rem',
-    color: '#555',
+    color: 'var(--color-text-secondary, #555)',
     marginBottom: '1.5rem',
   },
-  link: {
+  retryLink: {
     display: 'inline-block',
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
+    backgroundColor: 'var(--color-primary, #1a1a1a)',
+    color: 'var(--color-primary-text, #fff)',
     textDecoration: 'none',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',

@@ -91,7 +91,8 @@ function LinkUnavailable() {
     <main style={styles.container}>
       <h1 style={styles.heading}>Link unavailable</h1>
       <p style={styles.body}>
-        This share link is no longer valid or does not exist.
+        This share link has been revoked or does not exist. Please ask the
+        sender for an updated link.
       </p>
     </main>
   )
@@ -110,10 +111,11 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 600,
     marginBottom: '1rem',
+    color: 'var(--color-text-primary, #1a1a1a)',
   },
   body: {
     fontSize: '1rem',
-    color: '#555',
+    color: 'var(--color-text-secondary, #555)',
   },
   iframe: {
     width: '100%',
@@ -125,8 +127,8 @@ const styles = {
   downloadButton: {
     display: 'inline-block',
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#1a1a1a',
-    color: '#fff',
+    backgroundColor: 'var(--color-primary, #1a1a1a)',
+    color: 'var(--color-primary-text, #fff)',
     textDecoration: 'none',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
