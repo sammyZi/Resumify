@@ -14,12 +14,14 @@
  */
 
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
 import { useUIStore } from '@/lib/stores/ui-store'
 import type { Resume } from '@/lib/types'
 import { getTemplateMeta } from '@/lib/templates/registry'
+import { ConfirmModal } from '../_components/confirm-modal'
 import styles from '../_components/workspace-ui.module.css'
 
 async function fetchResumes(): Promise<Resume[]> {
@@ -70,6 +72,9 @@ export default function DashboardPage() {
   const queryClient = useQueryClient()
   const addToast = useUIStore((s) => s.addToast)
 
+  // Which resume is pending deletion (null = no modal open)
+  const [deleteTarget, setDeleteTarget] = useState<Resume | null>(null)
+
   const { data: resumes, isLoading, isError } = useQuery({
     queryKey: queryKeys.resumes(),
     queryFn: fetchResumes,
@@ -91,20 +96,18 @@ export default function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
       addToast('Resume deleted.', 'success')
+      setDeleteTarget(null)
     },
     onError: () => {
       addToast('Failed to delete resume. Please try again.', 'error')
+      setDeleteTarget(null)
     },
   })
 
-  function handleDelete(e: React.MouseEvent, resume: Resume) {
-    // The card is a link; prevent navigation when deleting.
+  function handleDeleteClick(e: React.MouseEvent, resume: Resume) {
     e.preventDefault()
     e.stopPropagation()
-    const name = resume.fullName || 'Untitled resume'
-    if (window.confirm(`Delete "${name}"? This cannot be undone.`)) {
-      deleteMutation.mutate(resume.id)
-    }
+    setDeleteTarget(resume)
   }
 
   const count = resumes?.length ?? 0
@@ -195,7 +198,7 @@ export default function DashboardPage() {
                     <button
                       type="button"
                       className={styles.cardDeleteButton}
-                      onClick={(e) => handleDelete(e, resume)}
+                      onClick={(e) => handleDeleteClick(e, resume)}
                       disabled={deleteMutation.isPending}
                       aria-label={`Delete ${name}`}
                       title="Delete resume"
@@ -232,6 +235,18 @@ export default function DashboardPage() {
             )
           })}
         </div>
+      )}
+      
+      {deleteTarget && (
+        <ConfirmModal
+          title="Delete resume?"
+          body={`"${deleteTarget.fullName || 'Untitled resume'}" will be permanently deleted. This cannot be undone.`}
+          confirmLabel="Delete"
+          variant="danger"
+          isPending={deleteMutation.isPending}
+          onConfirm={() => deleteMutation.mutate(deleteTarget.id)}
+          onCancel={() => setDeleteTarget(null)}
+        />
       )}
     </>
   )

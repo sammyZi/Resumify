@@ -18,15 +18,16 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 0 1.5rem;
-  height: 3.5rem;
-  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-  backdrop-filter: saturate(1.4) blur(8px);
-  -webkit-backdrop-filter: saturate(1.4) blur(8px);
-  border-bottom: 1px solid var(--color-border);
+  padding: 0 2rem;
+  height: 3.25rem;
+
+  /* Integrated — sits in normal flow, not floating */
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
+
+  /* No border, no card — blends into the page */
+  background: var(--color-background);
 }
 
 .navBrand {
@@ -130,11 +131,90 @@
   }
 }
 
+/* ─── User menu ──────────────────────────────────────────────────────────── */
+
+.userMenu {
+  position: relative;
+}
+
+.userMenuTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.userMenuTrigger:hover {
+  color: var(--color-text-primary);
+  background: var(--color-border);
+}
+
+.userMenuDropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 11rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.375rem;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text-primary) 12%, transparent);
+  z-index: 200;
+}
+
+.userMenuRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+}
+
+.userMenuLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.userMenuDivider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0.25rem 0;
+}
+
+.userMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.userMenuItem:hover {
+  background: var(--color-border);
+}
+
 /* ─── Page / Content area ────────────────────────────────────────────────── */
 
 .main {
   flex: 1;
-  padding: 2rem 1.5rem;
+  padding: 2rem 2rem 3rem;
   max-width: 56rem;
   margin: 0 auto;
   width: 100%;
@@ -435,7 +515,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .section {
@@ -448,7 +528,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.625rem;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -484,6 +564,14 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-text-primary);
+}
+
+/* Row that pairs a label with an inline action (e.g. refine button). */
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .input {
@@ -657,19 +745,38 @@
   border: 1px solid transparent;
 }
 
+/* Dark-first — override for light via attribute selector */
 .noticeSuccess {
+  color: #4ade80;
+  background: color-mix(in srgb, #16a34a 12%, var(--color-surface));
+  border-color: color-mix(in srgb, #16a34a 35%, transparent);
+}
+
+[data-theme='light'] .noticeSuccess {
   color: #166534;
   background: #f0fdf4;
   border-color: #bbf7d0;
 }
 
 .noticeError {
+  color: #f87171;
+  background: color-mix(in srgb, #dc2626 12%, var(--color-surface));
+  border-color: color-mix(in srgb, #dc2626 35%, transparent);
+}
+
+[data-theme='light'] .noticeError {
   color: #991b1b;
   background: #fef2f2;
   border-color: #fecaca;
 }
 
 .noticeInfo {
+  color: #93c5fd;
+  background: color-mix(in srgb, #2563eb 12%, var(--color-surface));
+  border-color: color-mix(in srgb, #2563eb 35%, transparent);
+}
+
+[data-theme='light'] .noticeInfo {
   color: #1e3a8a;
   background: #eff6ff;
   border-color: #bfdbfe;

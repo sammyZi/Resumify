@@ -64,7 +64,7 @@
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1.5rem;
-  background: #fdf6f0;
+  background: var(--color-background);
 }
 
 .contentInner {

@@ -1,0 +1,132 @@
+/* refine-field-button.module.css */
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+/* ── Sparkle trigger button ──────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.4rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  vertical-align: middle;
+}
+
+.btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 17%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnLoading {
+  opacity: 0.7;
+}
+
+/* Tiny spinner */
+.spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Accept/discard inline popover ──────────────────────────────────────── */
+
+.popover {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: color-mix(in srgb, var(--color-primary) 9%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  border-radius: 8px;
+  font-size: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.popoverLabel {
+  color: var(--color-primary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.popoverActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.acceptBtn {
+  padding: 0.1875rem 0.5rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: filter 0.12s ease;
+}
+
+.acceptBtn:hover {
+  filter: brightness(1.1);
+}
+
+.discardBtn {
+  padding: 0.1875rem 0.375rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.discardBtn:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* ── Inline error ─────────────────────────────────────────────────────────── */
+
+.errorInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #dc2626;
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .errorInline {
+  color: #f87171;
+}

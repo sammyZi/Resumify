@@ -239,6 +239,7 @@ export default function ProfilePage() {
         isSaving={saveMutation.isPending}
         fieldErrors={fieldErrors}
         onSave={handleSave}
+        resumeId="profile"
         saveNotice={saveNotice}
       />
     </>

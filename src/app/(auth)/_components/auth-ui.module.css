@@ -153,18 +153,36 @@
 }
 
 .noticeError {
+  color: #f87171;
+  background: color-mix(in srgb, #dc2626 12%, var(--color-surface));
+  border-color: color-mix(in srgb, #dc2626 35%, transparent);
+}
+
+[data-theme='light'] .noticeError {
   color: #991b1b;
   background: #fef2f2;
   border-color: #fecaca;
 }
 
 .noticeSuccess {
+  color: #4ade80;
+  background: color-mix(in srgb, #16a34a 12%, var(--color-surface));
+  border-color: color-mix(in srgb, #16a34a 35%, transparent);
+}
+
+[data-theme='light'] .noticeSuccess {
   color: #166534;
   background: #f0fdf4;
   border-color: #bbf7d0;
 }
 
 .noticeInfo {
+  color: #93c5fd;
+  background: color-mix(in srgb, #2563eb 12%, var(--color-surface));
+  border-color: color-mix(in srgb, #2563eb 35%, transparent);
+}
+
+[data-theme='light'] .noticeInfo {
   color: #1e3a8a;
   background: #eff6ff;
   border-color: #bfdbfe;

@@ -16,11 +16,12 @@ import type {
   ExperienceEntry,
   EducationEntry,
   ResumeLink,
-  LinkType,
   ProjectEntry,
   CertificationEntry,
 } from '@/lib/types'
 import { FieldErrors } from './field-errors'
+import { LinkTypeSelect } from './link-type-select'
+import { RefineFieldButton } from './refine-field-button'
 import styles from './workspace-ui.module.css'
 
 interface ResumeFormProps {
@@ -36,6 +37,13 @@ interface ResumeFormProps {
   extraActions?: React.ReactNode
   /** Optional save feedback notice (success/error banner). */
   saveNotice?: React.ReactNode
+  /**
+   * Resume id (or 'profile') used by inline refine buttons.
+   * When omitted, refine buttons are hidden.
+   */
+  resumeId?: string
+  /** Called by the form once it has its live-data snapshot function ready, so the parent can pass it to other components (e.g. RefinePanel). */
+  onGetDataReady?: (getter: () => Record<string, unknown>) => void
 }
 
 function emptyExperience(): ExperienceEntry {
@@ -54,16 +62,6 @@ function emptyCertification(): CertificationEntry {
   return { name: '', issuer: '', year: '' }
 }
 
-const LINK_TYPES: { value: LinkType; label: string }[] = [
-  { value: 'linkedin', label: 'LinkedIn' },
-  { value: 'github', label: 'GitHub' },
-  { value: 'leetcode', label: 'LeetCode' },
-  { value: 'website', label: 'Website' },
-  { value: 'twitter', label: 'X / Twitter' },
-  { value: 'dribbble', label: 'Dribbble' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'other', label: 'Other' },
-]
 
 export function ResumeForm({
   initialData,
@@ -72,6 +70,8 @@ export function ResumeForm({
   onSave,
   extraActions,
   saveNotice,
+  resumeId,
+  onGetDataReady,
 }: ResumeFormProps) {
   const [fullName, setFullName] = useState(initialData.fullName)
   const [email, setEmail] = useState(initialData.email)
@@ -232,6 +232,20 @@ export function ResumeForm({
     }
   }
 
+  // ── Snapshot for refine API ───────────────────────────────────────────────
+  const getFormData = (): Record<string, unknown> => ({
+    fullName, email, phone, location, summary, links,
+    experience, projects, education, certifications, skills, achievements,
+  })
+
+  // Always use our own live form snapshot (parent's getData is no longer needed).
+  const resolvedGetData = getFormData
+
+  // Notify parent of the getter so it can pass it to RefinePanel etc.
+  // Use a layout-style effect-free approach — just call it on every render.
+  // The parent stores it in a ref so this is safe.
+  if (onGetDataReady) onGetDataReady(resolvedGetData)
+
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       {/* ── Contact ────────────────────────────────────────────────────────── */}
@@ -308,9 +322,21 @@ export function ResumeForm({
           </div>
 
           <div className={`${styles.field} ${styles.fieldFull}`}>
-            <label className={styles.label} htmlFor="summary">
-              Professional summary
-            </label>
+            <div className={styles.labelRow}>
+              <label className={styles.label} htmlFor="summary">
+                Professional summary
+              </label>
+              {resumeId && (
+                <RefineFieldButton
+                  resumeId={resumeId}
+                  scope={{ kind: 'section', section: 'experience' }}
+                  extract="description"
+                  onAccept={(val) => setSummary(val)}
+                  getData={resolvedGetData}
+                  disabled={isSaving}
+                />
+              )}
+            </div>
             <textarea
               id="summary"
               name="summary"
@@ -346,18 +372,11 @@ export function ResumeForm({
 
         {links.map((link, idx) => (
           <div key={idx} className={styles.linkRow}>
-            <select
-              className={`${styles.input} ${styles.linkTypeSelect}`}
+            <LinkTypeSelect
               value={link.type}
-              onChange={(e) => updateLink(idx, 'type', e.target.value as LinkType)}
-              aria-label={`Link ${idx + 1} type`}
-            >
-              {LINK_TYPES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={(type) => updateLink(idx, 'type', type)}
+              label={`Link ${idx + 1} type`}
+            />
             <input
               type="url"
               placeholder="https://…"
@@ -476,9 +495,21 @@ export function ResumeForm({
               </div>
 
               <div className={`${styles.field} ${styles.fieldFull}`}>
-                <label className={styles.label} htmlFor={`exp-desc-${idx}`}>
-                  Description
-                </label>
+                <div className={styles.labelRow}>
+                  <label className={styles.label} htmlFor={`exp-desc-${idx}`}>
+                    Description
+                  </label>
+                  {resumeId && (
+                    <RefineFieldButton
+                      resumeId={resumeId}
+                      scope={{ kind: 'entry', section: 'experience', index: idx }}
+                      extract="description"
+                      onAccept={(val) => updateExperience(idx, 'description', val)}
+                      getData={resolvedGetData}
+                  disabled={isSaving}
+                    />
+                  )}
+                </div>
                 <textarea
                   id={`exp-desc-${idx}`}
                   className={`${styles.input} ${styles.textarea} ${fieldErrors?.[`experience[${idx}].description`] ? styles.inputError : ''}`}
@@ -594,9 +625,21 @@ export function ResumeForm({
               </div>
 
               <div className={`${styles.field} ${styles.fieldFull}`}>
-                <label className={styles.label} htmlFor={`proj-desc-${idx}`}>
-                  Description
-                </label>
+                <div className={styles.labelRow}>
+                  <label className={styles.label} htmlFor={`proj-desc-${idx}`}>
+                    Description
+                  </label>
+                  {resumeId && (
+                    <RefineFieldButton
+                      resumeId={resumeId}
+                      scope={{ kind: 'section', section: 'experience' }}
+                      extract="description"
+                      onAccept={(val) => updateProject(idx, 'description', val)}
+                      getData={resolvedGetData}
+                  disabled={isSaving}
+                    />
+                  )}
+                </div>
                 <textarea
                   id={`proj-desc-${idx}`}
                   className={`${styles.input} ${styles.textarea}`}
@@ -707,9 +750,21 @@ export function ResumeForm({
               </div>
 
               <div className={`${styles.field} ${styles.fieldFull}`}>
-                <label className={styles.label} htmlFor={`edu-desc-${idx}`}>
-                  Description
-                </label>
+                <div className={styles.labelRow}>
+                  <label className={styles.label} htmlFor={`edu-desc-${idx}`}>
+                    Description
+                  </label>
+                  {resumeId && (
+                    <RefineFieldButton
+                      resumeId={resumeId}
+                      scope={{ kind: 'entry', section: 'education', index: idx }}
+                      extract="description"
+                      onAccept={(val) => updateEducation(idx, 'description', val)}
+                      getData={resolvedGetData}
+                  disabled={isSaving}
+                    />
+                  )}
+                </div>
                 <textarea
                   id={`edu-desc-${idx}`}
                   className={`${styles.input} ${styles.textarea} ${fieldErrors?.[`education[${idx}].description`] ? styles.inputError : ''}`}
@@ -807,9 +862,24 @@ export function ResumeForm({
       {/* ── Skills ─────────────────────────────────────────────────────────── */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Skills</h2>
+          <h2 className={styles.sectionTitle}>
+            Skills
+          </h2>
+          {resumeId && (
+            <RefineFieldButton
+              resumeId={resumeId}
+              scope={{ kind: 'section', section: 'skills' }}
+              extract="skills"
+              onAccept={(val) => {
+                // val is comma-separated skills string
+                const refined = val.split(',').map((s) => s.trim()).filter(Boolean)
+                setSkills(refined)
+              }}
+              getData={resolvedGetData}
+                  disabled={isSaving}
+            />
+          )}
         </div>
-
         <FieldErrors errors={fieldErrors} field="skills" />
 
         {skills.length > 0 && (
@@ -924,3 +994,4 @@ export function ResumeForm({
     </form>
   )
 }
+
