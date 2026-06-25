@@ -78,7 +78,7 @@ export async function POST(
   if (!compileResult.ok) {
     if (compileResult.error.kind === 'timeout') {
       return Response.json(
-        { error: 'timeout', message: 'Compilation exceeded 30 seconds' },
+        { error: 'timeout', message: 'Compilation exceeded 90 seconds' },
         { status: 504 }
       )
     }
