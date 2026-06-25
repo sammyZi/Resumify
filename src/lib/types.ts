@@ -69,6 +69,27 @@ export type Share = {
   revoked: boolean
 }
 
+// ─── Share resolution types ───────────────────────────────────────────────
+
+/**
+ * Returned by ShareService.resolveShare on success.
+ *
+ * For recruiter shares: pdfPath is the PDF storage path (may be null if not yet compiled).
+ * For template shares: templateId and latexScaffold carry the structural data.
+ *
+ * Resume_Data fields (fullName, email, experience, education, skills) are
+ * intentionally absent — they are never exposed through a share.
+ */
+export type ResolvedShare = {
+  share: Share
+  /** Present for kind='recruiter' shares — the PDF storage path, or null if not yet compiled. */
+  pdfPath: string | null
+  /** Present for kind='template' shares — the template UUID. */
+  templateId: string | null
+  /** Present for kind='template' shares — the raw LaTeX scaffold string. */
+  latexScaffold: string | null
+}
+
 // ─── Store input types ────────────────────────────────────────────────────
 // Used by ProfileStore and ResumeStore interfaces.
 // Both accept the mutable ResumeData fields; server-managed fields
