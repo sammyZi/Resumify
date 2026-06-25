@@ -6,7 +6,8 @@
  * within 3 seconds (it is effectively immediate — Supabase returns the URL
  * without any network call).
  *
- * On failure to obtain the redirect URL, redirects to /auth/login?error=oauth_failed.
+ * On failure to obtain the redirect URL, redirects to /login?error=oauth_failed
+ * (the login UI page surfaces the message).
  *
  * Requirements: 2.1, 2.2
  */
@@ -18,7 +19,7 @@ export async function GET() {
   const result = await startGoogleOAuth()
 
   if (!result.ok) {
-    redirect('/auth/login?error=oauth_failed')
+    redirect('/login?error=oauth_failed')
   }
 
   redirect(result.value.redirectUrl)

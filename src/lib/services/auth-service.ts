@@ -278,7 +278,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   try {
     const supabase = await createSupabaseServerClient()
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/reset-password`,
     })
   } catch {
     // Swallow all errors — uniform outward response required.
