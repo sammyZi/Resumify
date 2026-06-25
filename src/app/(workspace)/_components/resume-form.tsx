@@ -62,6 +62,47 @@ function emptyCertification(): CertificationEntry {
   return { name: '', issuer: '', year: '' }
 }
 
+/**
+ * TechStackInput — free-text input that lets the user type commas/spaces freely
+ * while emitting the parsed array. Keeps its own raw text so typing isn't
+ * normalized on every keystroke (which previously ate commas/spaces).
+ */
+function TechStackInput({
+  id,
+  value,
+  onChange,
+  className,
+}: {
+  id: string
+  value: string[]
+  onChange: (v: string[]) => void
+  className?: string
+}) {
+  const [text, setText] = useState(value.join(', '))
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value
+    setText(raw)
+    onChange(
+      raw
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    )
+  }
+
+  return (
+    <input
+      id={id}
+      type="text"
+      placeholder="React, Node.js, PostgreSQL"
+      className={className}
+      value={text}
+      onChange={handleChange}
+    />
+  )
+}
+
 
 export function ResumeForm({
   initialData,
@@ -329,8 +370,8 @@ export function ResumeForm({
               {resumeId && (
                 <RefineFieldButton
                   resumeId={resumeId}
-                  scope={{ kind: 'section', section: 'experience' }}
-                  extract="description"
+                  scope={{ kind: 'summary' }}
+                  extract="summary"
                   onAccept={(val) => setSummary(val)}
                   getData={resolvedGetData}
                   disabled={isSaving}
@@ -605,22 +646,11 @@ export function ResumeForm({
                 <label className={styles.label} htmlFor={`proj-tech-${idx}`}>
                   Tech stack <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400 }}>(comma separated)</span>
                 </label>
-                <input
+                <TechStackInput
                   id={`proj-tech-${idx}`}
-                  type="text"
-                  placeholder="React, Node.js, PostgreSQL"
                   className={styles.input}
-                  value={project.techStack.join(', ')}
-                  onChange={(e) =>
-                    updateProject(
-                      idx,
-                      'techStack',
-                      e.target.value
-                        .split(',')
-                        .map((t) => t.trim())
-                        .filter(Boolean)
-                    )
-                  }
+                  value={project.techStack}
+                  onChange={(v) => updateProject(idx, 'techStack', v)}
                 />
               </div>
 
@@ -632,8 +662,8 @@ export function ResumeForm({
                   {resumeId && (
                     <RefineFieldButton
                       resumeId={resumeId}
-                      scope={{ kind: 'section', section: 'experience' }}
-                      extract="description"
+                      scope={{ kind: 'project', index: idx }}
+                      extract="project"
                       onAccept={(val) => updateProject(idx, 'description', val)}
                       getData={resolvedGetData}
                   disabled={isSaving}

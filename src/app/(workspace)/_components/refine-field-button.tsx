@@ -14,16 +14,18 @@ import { useState } from 'react'
 import styles from './refine-field-button.module.css'
 
 type FieldScope =
+  | { kind: 'summary' }
   | { kind: 'entry'; section: 'experience' | 'education'; index: number }
-  | { kind: 'section'; section: 'experience' | 'education' | 'skills' }
+  | { kind: 'section'; section: 'skills' }
+  | { kind: 'project'; index: number }
 
 interface Props {
   /** resume id, or 'profile' for the profile page */
   resumeId: string
   /** Which scope to call — drives which part of the suggestion we extract. */
   scope: FieldScope
-  /** Which text field to extract from the returned entry/section. */
-  extract: 'description' | 'skills'
+  /** Which text field to extract from the returned suggestion. */
+  extract: 'summary' | 'description' | 'skills' | 'project'
   /** Called with the refined text string when the user accepts. */
   onAccept: (value: string) => void
   /** Disabled while the form is saving. */
@@ -68,10 +70,15 @@ async function callRefine(
       ? '/api/profile/refine'
       : `/api/resumes/${resumeId}/refine`
 
+  // Map field scope to the API scope shape.
   const apiScope =
     scope.kind === 'entry'
       ? { kind: 'entry', section: scope.section, index: scope.index }
-      : { kind: 'section', section: scope.section }
+      : scope.kind === 'project'
+        ? { kind: 'project', index: scope.index }
+        : scope.kind === 'summary'
+          ? { kind: 'summary' }
+          : { kind: 'section', section: scope.section }
 
   const res = await fetch(url, {
     method: 'POST',
@@ -92,20 +99,28 @@ async function callRefine(
   const body = await res.json()
   const suggestion = body.suggestion as Record<string, unknown> | undefined
 
+  if (extract === 'summary') {
+    return typeof suggestion?.summary === 'string' ? (suggestion.summary as string) : null
+  }
+
+  if (extract === 'project') {
+    return typeof suggestion?.projectDescription === 'string'
+      ? (suggestion.projectDescription as string)
+      : null
+  }
+
   if (extract === 'skills') {
     const skills = suggestion?.skills as string[] | undefined
     return skills && skills.length > 0 ? skills.join(', ') : null
   }
 
-  // extract === 'description'
+  // extract === 'description' — pull the first entry's description
   if (scope.kind === 'entry') {
-    const arr = (suggestion?.[scope.section] as Array<{ description?: string }> | undefined)
+    const arr = suggestion?.[scope.section] as Array<{ description?: string }> | undefined
     return arr?.[0]?.description ?? null
   }
 
-  // section — take first entry's description
-  const arr = (suggestion?.[(scope as { section: string }).section] as Array<{ description?: string }> | undefined)
-  return arr?.[0]?.description ?? null
+  return null
 }
 
 export function RefineFieldButton({ resumeId, scope, extract, onAccept, disabled, getData }: Props) {

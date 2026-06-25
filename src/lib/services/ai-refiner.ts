@@ -33,12 +33,16 @@ export type RefineScope =
   | { kind: 'all' }
   | { kind: 'section'; section: 'experience' | 'education' | 'skills' }
   | { kind: 'entry'; section: 'experience' | 'education'; index: number }
+  | { kind: 'summary' }
+  | { kind: 'project'; index: number }
 
 export type RefinementSuggestion = {
   scope: RefineScope
   experience?: ExperienceEntry[]
   education?: EducationEntry[]
   skills?: string[]
+  summary?: string
+  projectDescription?: string
 }
 
 // ─── Empty-scope check ────────────────────────────────────────────────────────
@@ -63,6 +67,15 @@ function isScopeEmpty(resumeData: ResumeData, scope: RefineScope): boolean {
       const list =
         scope.section === 'experience' ? resumeData.experience : resumeData.education
       return scope.index < 0 || scope.index >= list.length
+    }
+    case 'summary':
+      return (resumeData.summary ?? '').trim() === ''
+    case 'project': {
+      const projects = resumeData.projects ?? []
+      const p = projects[scope.index]
+      if (!p) return true
+      // Nothing to refine if there is neither a name nor a description.
+      return p.name.trim() === '' && p.description.trim() === ''
     }
   }
 }
@@ -128,6 +141,14 @@ function buildResponseShape(scope: RefineScope): string {
       return `{
   "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "..." } ]
 }`
+    case 'summary':
+      return `{
+  "summary": "A concise 2-3 sentence professional summary."
+}`
+    case 'project':
+      return `{
+  "description": "A concise, impactful project description."
+}`
   }
 }
 
@@ -171,6 +192,21 @@ function buildPrompt(resumeData: ResumeData, scope: RefineScope, roleCategory?: 
         const entry = resumeData.education[scope.index]
         contentSection = `Education entry [${scope.index}]:\n${formatEducationEntries([entry])}`
       }
+      break
+    }
+    case 'summary': {
+      contentSection = `Professional summary:\n${resumeData.summary}`
+      break
+    }
+    case 'project': {
+      const p = (resumeData.projects ?? [])[scope.index]
+      const tech = p.techStack.length > 0 ? p.techStack.join(', ') : '(none)'
+      contentSection = [
+        `Project:`,
+        `  Name: ${p.name}`,
+        `  Tech stack: ${tech}`,
+        `  Description: ${p.description}`,
+      ].join('\n')
       break
     }
   }
@@ -221,12 +257,21 @@ function parseResponse(raw: string, scope: RefineScope): RefinementSuggestion | 
     if (Array.isArray(parsed.skills)) {
       suggestion.skills = parsed.skills as string[]
     }
+    if (typeof parsed.summary === 'string') {
+      suggestion.summary = parsed.summary
+    }
+    // For project scope the model returns { description: "..." }
+    if (scope.kind === 'project' && typeof parsed.description === 'string') {
+      suggestion.projectDescription = parsed.description
+    }
 
     // Must have at least one field
     if (
       suggestion.experience === undefined &&
       suggestion.education === undefined &&
-      suggestion.skills === undefined
+      suggestion.skills === undefined &&
+      suggestion.summary === undefined &&
+      suggestion.projectDescription === undefined
     ) {
       return null
     }

@@ -17,38 +17,38 @@ body {
 ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='light'] {
-  --color-background:    #ffffff;
-  --color-surface:       #f5f5f5;
-  --color-text-primary:  #1a1a1a;
-  --color-text-secondary:#4a4a4a;
-  --color-border:        #d4d4d4;
-  --color-primary:       #2563eb;
+  --color-background:    #fdfbf7;
+  --color-surface:       #f4eee3;
+  --color-text-primary:  #2b2420;
+  --color-text-secondary:#6b5f54;
+  --color-border:        #e4dccd;
+  --color-primary:       #c2410c;
   --color-primary-text:  #ffffff;
 
   /* Legacy aliases kept for backwards compatibility */
-  --background: #ffffff;
-  --foreground: #1a1a1a;
+  --background: #fdfbf7;
+  --foreground: #2b2420;
 }
 
 /* ─── Dark theme palette ─────────────────────────────────────────────────────
-   All text/background pairs achieve ≥ 4.5:1 contrast (Req 9.5):
-     --color-text-primary   #f0f0f0 on --color-background #121212  → ~16.7:1
-     --color-text-secondary #a3a3a3 on --color-background #121212  → ~6.1:1
-     --color-primary-text   #ffffff on --color-primary    #3b82f6  → ~4.6:1
+   Warm charcoal surfaces with an amber accent. Contrast pairs ≥ 4.5:1:
+     --color-text-primary   #f5efe8 on --color-background #1a1613  → ~15:1
+     --color-text-secondary #b5a99b on --color-background #1a1613  → ~7:1
+     --color-primary-text   #1a1613 on --color-primary    #f59e0b  → ~9:1
 ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='dark'] {
-  --color-background:    #121212;
-  --color-surface:       #1e1e1e;
-  --color-text-primary:  #f0f0f0;
-  --color-text-secondary:#a3a3a3;
-  --color-border:        #3a3a3a;
-  --color-primary:       #3b82f6;
-  --color-primary-text:  #ffffff;
+  --color-background:    #1a1613;
+  --color-surface:       #241f1a;
+  --color-text-primary:  #f5efe8;
+  --color-text-secondary:#b5a99b;
+  --color-border:        #3a322b;
+  --color-primary:       #f59e0b;
+  --color-primary-text:  #1a1613;
 
   /* Legacy aliases */
-  --background: #121212;
-  --foreground: #f0f0f0;
+  --background: #1a1613;
+  --foreground: #f5efe8;
 }
 
 /* ─── Base reset and layout ──────────────────────────────────────────────── */

@@ -33,8 +33,8 @@ function spawnCube(
   const dist = Math.hypot(dx, dy)
   const duration = 320 + dist * 0.22
 
-  const faceColor = enteringDark ? 'rgba(14,35,83,0.92)' : 'rgba(99,132,255,0.92)'
-  const edgeColor = enteringDark ? 'rgba(125,164,255,0.55)' : 'rgba(255,255,255,0.55)'
+  const faceColor = enteringDark ? 'rgba(146,64,14,0.92)' : 'rgba(194,65,12,0.92)'
+  const edgeColor = enteringDark ? 'rgba(245,158,11,0.6)' : 'rgba(255,237,213,0.6)'
   const size = 28
 
   cube.style.cssText = `

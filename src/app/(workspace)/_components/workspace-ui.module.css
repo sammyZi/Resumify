@@ -515,7 +515,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 3.5rem;
 }
 
 .section {
