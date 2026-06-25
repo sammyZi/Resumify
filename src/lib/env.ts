@@ -32,14 +32,8 @@ export const serverEnv = {
   /** Supabase service-role key — bypasses RLS; must remain server-side only. */
   supabaseServiceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
 
-  /** OpenAI API key for AI LaTeX generation. */
+  /** OpenAI API key for AI content refinement. */
   openaiApiKey: requireEnv('OPENAI_API_KEY'),
-
-  /** Base URL of the internal Tectonic compile service. */
-  compilerUrl: requireEnv('COMPILER_URL'),
-
-  /** Shared secret for authenticating requests to the compile service. */
-  compilerSecret: requireEnv('COMPILER_SECRET'),
 } as const
 
 // Re-export public config so callers that only need public vars can import

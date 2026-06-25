@@ -12,19 +12,20 @@
  * - Save-failure + retry on 500 (Req 5.7)
  * - "Save to profile" button via POST /api/resumes/:id/save-to-profile (Req 11.7)
  * - Edits to resume do NOT automatically update the profile (Req 11.6)
- * - Generation & Download panel: generate LaTeX, compile PDF, download (Req 6.2–6.4, 7.3–7.6)
- * - Sharing panel: create recruiter/template share links, list and revoke them (Req 8.1–8.7)
+ * - Preview & Download panel: links to the rendered template preview where the
+ *   resume is downloaded as a PDF via the browser (no LaTeX, no compile service)
+ * - Sharing panel: create recruiter/template share links, list and revoke them
+ * - AI Content Refinement panel: refine all/section/entry, accept or discard
  *
- * Requirements: 5.1, 5.2, 5.3, 5.5, 5.6, 5.7, 6.2, 6.3, 6.4, 7.3, 7.4, 7.5, 7.6, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 11.6, 11.7
+ * Requirements: 5.1, 5.2, 5.3, 5.5, 5.6, 5.7, 8.1–8.7, 11.6, 11.7, 12.1–12.11
  */
 
 import { use, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
 import { useUIStore } from '@/lib/stores/ui-store'
-import type { Resume, ResumeData, Share } from '@/lib/types'
+import type { Resume, ResumeData, ExperienceEntry, EducationEntry, Share } from '@/lib/types'
 import { ResumeForm } from '../../_components/resume-form'
 import styles from '../../_components/workspace-ui.module.css'
 
@@ -75,83 +76,42 @@ async function saveToProfile(id: string): Promise<SaveToProfileResult> {
   return res.json() as Promise<SaveToProfileResult>
 }
 
-// ── Generate API ──────────────────────────────────────────────────────────────
+// ── Refine API ────────────────────────────────────────────────────────────────
 
-type GenerateResult =
-  | { success: true; latex: string }
-  | { success: false; error: 'missing_prerequisites'; missing: string[] }
-  | { success: false; error: 'generation_failed'; message: string }
-  | { success: false; error: 'save_failed'; latex: string }
-  | { success: false; error: 'unknown'; message: string }
+// Re-declared locally (server-side ai-refiner.ts uses 'server-only'; types are pure TS).
+type RefineScope =
+  | { kind: 'all' }
+  | { kind: 'section'; section: 'experience' | 'education' | 'skills' }
+  | { kind: 'entry'; section: 'experience' | 'education'; index: number }
 
-async function generateLatex(id: string): Promise<GenerateResult> {
-  const res = await fetch(`/api/resumes/${id}/generate`, { method: 'POST' })
-  if (res.status === 401) {
-    window.location.href = '/login'
-    throw new Error('Unauthorized')
-  }
-  const data = await res.json()
-  if (res.ok) return { success: true, latex: data.latex as string }
-  if (data.error === 'missing_prerequisites') {
-    return { success: false, error: 'missing_prerequisites', missing: data.missing as string[] }
-  }
-  if (data.error === 'generation_failed') {
-    return { success: false, error: 'generation_failed', message: data.message as string }
-  }
-  if (data.error === 'save_failed') {
-    return { success: false, error: 'save_failed', latex: data.latex as string }
-  }
-  return { success: false, error: 'unknown', message: data.message ?? 'Unexpected error' }
+type RefinementSuggestion = {
+  scope: RefineScope
+  experience?: ExperienceEntry[]
+  education?: EducationEntry[]
+  skills?: string[]
 }
 
-// ── Compile API ───────────────────────────────────────────────────────────────
-
-type CompileResult =
-  | { success: true; pdfPath: string }
-  | { success: false; error: 'no_latex_source'; message: string }
-  | { success: false; error: 'compile_error'; detail: string }
-  | { success: false; error: 'timeout'; message: string }
-  | { success: false; error: 'storage_failed' | 'save_failed'; message: string; retry: true }
+type RefineResult =
+  | { success: true; suggestion: RefinementSuggestion }
+  | { success: false; error: 'empty_scope'; message: string }
+  | { success: false; error: 'refinement_failed'; message: string }
   | { success: false; error: 'unknown'; message: string }
 
-async function compileLatex(id: string): Promise<CompileResult> {
-  const res = await fetch(`/api/resumes/${id}/compile`, { method: 'POST' })
+async function refineResume(id: string, scope: RefineScope): Promise<RefineResult> {
+  const res = await fetch(`/api/resumes/${id}/refine`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scope }),
+  })
   if (res.status === 401) {
     window.location.href = '/login'
     throw new Error('Unauthorized')
   }
   const data = await res.json()
-  if (res.ok) return { success: true, pdfPath: data.pdfPath as string }
-  if (data.error === 'no_latex_source') {
-    return { success: false, error: 'no_latex_source', message: data.message as string }
-  }
-  if (data.error === 'compile_error') {
-    return { success: false, error: 'compile_error', detail: data.detail as string }
-  }
-  if (data.error === 'timeout') {
-    return { success: false, error: 'timeout', message: data.message as string }
-  }
-  if (data.error === 'storage_failed' || data.error === 'save_failed') {
-    return { success: false, error: data.error, message: data.message as string, retry: true }
-  }
+  if (res.ok) return { success: true, suggestion: data.suggestion as RefinementSuggestion }
+  if (data.error === 'empty_scope') return { success: false, error: 'empty_scope', message: data.message }
+  if (data.error === 'refinement_failed') return { success: false, error: 'refinement_failed', message: data.message }
   return { success: false, error: 'unknown', message: data.message ?? 'Unexpected error' }
-}
-
-// ── Download API ──────────────────────────────────────────────────────────────
-
-type DownloadResult =
-  | { success: true; url: string }
-  | { success: false; message: string }
-
-async function fetchDownloadUrl(id: string): Promise<DownloadResult> {
-  const res = await fetch(`/api/resumes/${id}/download`)
-  if (res.status === 401) {
-    window.location.href = '/login'
-    throw new Error('Unauthorized')
-  }
-  const data = await res.json()
-  if (res.ok) return { success: true, url: data.url as string }
-  return { success: false, message: data.message ?? 'Failed to get download URL' }
 }
 
 // ── Share API ─────────────────────────────────────────────────────────────────
@@ -207,7 +167,6 @@ export default function ResumeEditorPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const router = useRouter()
   const queryClient = useQueryClient()
   const addToast = useUIStore((s) => s.addToast)
 
@@ -222,36 +181,24 @@ export default function ResumeEditorPage({
   // Save-to-profile feedback
   const [s2pState, setS2pState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
-  // ── Generation state ────────────────────────────────────────────────────────
-  type GenerateState =
-    | { kind: 'idle' }
-    | { kind: 'success' }
-    | { kind: 'missing_prerequisites'; missing: string[] }
-    | { kind: 'generation_failed'; message: string }
-    | { kind: 'save_failed' }
-  const [generateState, setGenerateState] = useState<GenerateState>({ kind: 'idle' })
-  const [generateAttempts, setGenerateAttempts] = useState(0)
-
-  // ── Compile state ───────────────────────────────────────────────────────────
-  type CompileState =
-    | { kind: 'idle' }
-    | { kind: 'success' }
-    | { kind: 'no_latex_source' }
-    | { kind: 'compile_error'; detail: string }
-    | { kind: 'timeout' }
-    | { kind: 'storage_error'; message: string }
-  const [compileState, setCompileState] = useState<CompileState>({ kind: 'idle' })
-
-  // ── Download state ──────────────────────────────────────────────────────────
-  type DownloadState = 'idle' | 'loading' | 'error'
-  const [downloadState, setDownloadState] = useState<DownloadState>('idle')
-  const [downloadErrorMsg, setDownloadErrorMsg] = useState<string>('')
-
   // ── Share state ─────────────────────────────────────────────────────────────
   // Local list of non-revoked shares (populated on creation, removed on revoke).
   type ShareEntry = Share & { url: string }
   const [shares, setShares] = useState<ShareEntry[]>([])
   const [shareCreateError, setShareCreateError] = useState<string | null>(null)
+
+  // ── Refinement state ─────────────────────────────────────────────────────────
+  type RefineState =
+    | { kind: 'idle' }
+    | { kind: 'success'; suggestion: RefinementSuggestion }
+    | { kind: 'empty_scope'; message: string }
+    | { kind: 'failed'; message: string }
+  const [refineState, setRefineState] = useState<RefineState>({ kind: 'idle' })
+  const [refineAttempts, setRefineAttempts] = useState(0)
+  const [activeScope, setActiveScope] = useState<RefineScope | null>(null)
+  // draftData holds accepted suggestion content; re-keys the form on accept
+  const [draftData, setDraftData] = useState<ResumeData | null>(null)
+  const [draftKey, setDraftKey] = useState(0)
 
   const {
     data: resume,
@@ -306,51 +253,20 @@ export default function ResumeEditorPage({
     },
   })
 
-  // ── Generate mutation ───────────────────────────────────────────────────────
-  const generateMutation = useMutation({
-    mutationFn: () => generateLatex(id),
+  // ── Refine mutation ───────────────────────────────────────────────────────
+  const refineMutation = useMutation({
+    mutationFn: (scope: RefineScope) => refineResume(id, scope),
     onSuccess: (result) => {
       if (result.success) {
-        setGenerateState({ kind: 'success' })
-        // Refresh resume so latexSource reflects new value
-        queryClient.invalidateQueries({ queryKey: queryKeys.resume(id) })
-      } else if (result.error === 'missing_prerequisites') {
-        setGenerateState({ kind: 'missing_prerequisites', missing: result.missing })
-      } else if (result.error === 'generation_failed') {
-        setGenerateState({ kind: 'generation_failed', message: result.message })
-      } else if (result.error === 'save_failed') {
-        setGenerateState({ kind: 'save_failed' })
+        setRefineState({ kind: 'success', suggestion: result.suggestion })
+      } else if (result.error === 'empty_scope') {
+        setRefineState({ kind: 'empty_scope', message: result.message })
       } else {
-        setGenerateState({ kind: 'generation_failed', message: 'Unexpected error during generation.' })
+        setRefineState({ kind: 'failed', message: result.message })
       }
     },
     onError: () => {
-      setGenerateState({ kind: 'generation_failed', message: 'Network error. Please try again.' })
-    },
-  })
-
-  // ── Compile mutation ────────────────────────────────────────────────────────
-  const compileMutation = useMutation({
-    mutationFn: () => compileLatex(id),
-    onSuccess: (result) => {
-      if (result.success) {
-        setCompileState({ kind: 'success' })
-        // Refresh resume so pdfPath is updated (enables download button)
-        queryClient.invalidateQueries({ queryKey: queryKeys.resume(id) })
-      } else if (result.error === 'no_latex_source') {
-        setCompileState({ kind: 'no_latex_source' })
-      } else if (result.error === 'compile_error') {
-        setCompileState({ kind: 'compile_error', detail: result.detail })
-      } else if (result.error === 'timeout') {
-        setCompileState({ kind: 'timeout' })
-      } else if (result.error === 'storage_failed' || result.error === 'save_failed') {
-        setCompileState({ kind: 'storage_error', message: result.message })
-      } else {
-        setCompileState({ kind: 'storage_error', message: 'Unexpected error during compilation.' })
-      }
-    },
-    onError: () => {
-      setCompileState({ kind: 'storage_error', message: 'Network error. Please try again.' })
+      setRefineState({ kind: 'failed', message: 'Network error. Please try again.' })
     },
   })
 
@@ -412,42 +328,52 @@ export default function ResumeEditorPage({
     },
   })
 
-  // ── Generation handlers ─────────────────────────────────────────────────────
-  function handleGenerate() {
-    setGenerateState({ kind: 'idle' })
-    setGenerateAttempts((n) => n + 1)
-    generateMutation.mutate()
+  // ── Refine handlers ───────────────────────────────────────────────────────
+
+  function handleRefine(scope: RefineScope) {
+    setRefineState({ kind: 'idle' })
+    setActiveScope(scope)
+    setRefineAttempts((n) => n + 1)
+    refineMutation.mutate(scope)
   }
 
-  function handleGenerateRetry() {
-    if (generateAttempts < 3) {
-      handleGenerate()
+  function handleRefineRetry() {
+    if (activeScope && refineAttempts < 3) {
+      handleRefine(activeScope)
     }
   }
 
-  // ── Compile handler ─────────────────────────────────────────────────────────
-  function handleCompile() {
-    setCompileState({ kind: 'idle' })
-    compileMutation.mutate()
+  function handleAcceptSuggestion(suggestion: RefinementSuggestion) {
+    // Apply suggestion fields onto current data (contact fields are never touched — Req 12.6)
+    const base: ResumeData = draftData ?? {
+      fullName: resume!.fullName,
+      email: resume!.email,
+      phone: resume!.phone,
+      location: resume!.location,
+      summary: resume!.summary,
+      links: resume!.links,
+      experience: resume!.experience,
+      projects: resume!.projects,
+      education: resume!.education,
+      certifications: resume!.certifications,
+      skills: resume!.skills,
+      achievements: resume!.achievements,
+    }
+
+    const updated: ResumeData = {
+      ...base,
+      ...(suggestion.experience !== undefined ? { experience: suggestion.experience } : {}),
+      ...(suggestion.education !== undefined ? { education: suggestion.education } : {}),
+      ...(suggestion.skills !== undefined ? { skills: suggestion.skills } : {}),
+    }
+    setDraftData(updated)
+    setDraftKey((k) => k + 1) // force form re-mount with new data (Req 12.5)
+    setRefineState({ kind: 'idle' })
   }
 
-  // ── Download handler ────────────────────────────────────────────────────────
-  async function handleDownload() {
-    setDownloadState('loading')
-    setDownloadErrorMsg('')
-    try {
-      const result = await fetchDownloadUrl(id)
-      if (result.success) {
-        window.open(result.url, '_blank', 'noopener,noreferrer')
-        setDownloadState('idle')
-      } else {
-        setDownloadErrorMsg(result.message)
-        setDownloadState('error')
-      }
-    } catch {
-      setDownloadErrorMsg('Failed to get download URL.')
-      setDownloadState('error')
-    }
+  function handleDiscardSuggestion() {
+    // Req 12.7: discard leaves original field content unchanged
+    setRefineState({ kind: 'idle' })
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -461,7 +387,7 @@ export default function ResumeEditorPage({
     return (
       <>
         <Link href="/resumes" className={styles.backLink}>
-          ← Back to resumes
+          ← Back to dashboard
         </Link>
         <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
           {msg}
@@ -473,197 +399,156 @@ export default function ResumeEditorPage({
   const initialData: ResumeData = {
     fullName: resume.fullName,
     email: resume.email,
+    phone: resume.phone,
+    location: resume.location,
+    summary: resume.summary,
+    links: resume.links,
     experience: resume.experience,
+    projects: resume.projects,
     education: resume.education,
+    certifications: resume.certifications,
     skills: resume.skills,
+    achievements: resume.achievements,
   }
 
-  // ── Generation Panel ────────────────────────────────────────────────────────
-  // Req 6.2, 6.3, 6.4, 7.3, 7.4, 7.5, 7.6
-  const hasPdf = Boolean(resume.pdfPath)
-
-  const generationPanel = (
+  // ── Refinement Panel ─────────────────────────────────────────────────────
+  const refinementPanel = (
     <section className={styles.section} style={{ marginTop: '2rem' }}>
       <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>Generation &amp; Download</h2>
+        <h2 className={styles.sectionTitle}>AI Content Refinement</h2>
+        <span className={styles.entryCardTitle}>Optional — never required to save or download</span>
       </div>
 
-      {/* ── Generate ─────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className={styles.button}
-            onClick={handleGenerate}
-            disabled={generateMutation.isPending}
-          >
-            {generateMutation.isPending ? 'Generating…' : 'Generate LaTeX'}
-          </button>
-          {generateMutation.isPending && (
-            <span
-              role="status"
-              aria-live="polite"
-              className={`${styles.notice} ${styles.noticeInfo}`}
-              style={{ padding: '0.375rem 0.75rem' }}
-            >
-              Generating LaTeX source…
-            </span>
-          )}
-        </div>
-
-        {/* Generate feedback */}
-        {!generateMutation.isPending && generateState.kind === 'success' && (
-          <div className={`${styles.notice} ${styles.noticeSuccess}`} role="status">
-            LaTeX generated successfully.
-          </div>
-        )}
-        {!generateMutation.isPending && generateState.kind === 'missing_prerequisites' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            Missing prerequisites:{' '}
-            <strong>{generateState.missing.join(', ')}</strong>. Please save
-            your resume data and select a template before generating.
-          </div>
-        )}
-        {!generateMutation.isPending && generateState.kind === 'generation_failed' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            <span>Generation failed: {generateState.message}</span>
-            {generateAttempts < 3 && (
-              <div className={styles.noticeAction}>
-                <button
-                  type="button"
-                  onClick={handleGenerateRetry}
-                  style={{
-                    font: 'inherit',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: 'var(--color-primary)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-        {!generateMutation.isPending && generateState.kind === 'save_failed' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            <span>LaTeX generated but failed to save. Please retry.</span>
-            {generateAttempts < 3 && (
-              <div className={styles.noticeAction}>
-                <button
-                  type="button"
-                  onClick={handleGenerateRetry}
-                  style={{
-                    font: 'inherit',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: 'var(--color-primary)',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* ── Compile ──────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             type="button"
             className={`${styles.button} ${styles.buttonSecondary}`}
-            onClick={handleCompile}
-            disabled={compileMutation.isPending}
+            onClick={() => handleRefine({ kind: 'all' })}
+            disabled={refineMutation.isPending}
           >
-            {compileMutation.isPending ? 'Compiling…' : 'Compile PDF'}
+            {refineMutation.isPending && activeScope?.kind === 'all' ? 'Refining…' : 'Refine all'}
           </button>
-          {compileMutation.isPending && (
-            <span
-              role="status"
-              aria-live="polite"
-              className={`${styles.notice} ${styles.noticeInfo}`}
-              style={{ padding: '0.375rem 0.75rem' }}
-            >
-              Compiling PDF…
-            </span>
-          )}
+          <button
+            type="button"
+            className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+            onClick={() => handleRefine({ kind: 'section', section: 'experience' })}
+            disabled={refineMutation.isPending}
+          >
+            {refineMutation.isPending && activeScope?.kind === 'section' && activeScope.section === 'experience' ? 'Refining…' : 'Refine experience'}
+          </button>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+            onClick={() => handleRefine({ kind: 'section', section: 'education' })}
+            disabled={refineMutation.isPending}
+          >
+            {refineMutation.isPending && activeScope?.kind === 'section' && activeScope.section === 'education' ? 'Refining…' : 'Refine education'}
+          </button>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+            onClick={() => handleRefine({ kind: 'section', section: 'skills' })}
+            disabled={refineMutation.isPending}
+          >
+            {refineMutation.isPending && activeScope?.kind === 'section' && activeScope.section === 'skills' ? 'Refining…' : 'Refine skills'}
+          </button>
         </div>
 
-        {/* Compile feedback */}
-        {!compileMutation.isPending && compileState.kind === 'success' && (
-          <div className={`${styles.notice} ${styles.noticeSuccess}`} role="status">
-            PDF compiled successfully.
+        {/* In-progress indicator — Req 12.11 */}
+        {refineMutation.isPending && (
+          <span
+            role="status"
+            aria-live="polite"
+            className={`${styles.notice} ${styles.noticeInfo}`}
+            style={{ padding: '0.375rem 0.75rem' }}
+          >
+            Refining content…
+          </span>
+        )}
+
+        {/* Empty scope error — Req 12.9 */}
+        {!refineMutation.isPending && refineState.kind === 'empty_scope' && (
+          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
+            {refineState.message}
           </div>
         )}
-        {!compileMutation.isPending && compileState.kind === 'no_latex_source' && (
+
+        {/* Failure with retry — Req 12.10 */}
+        {!refineMutation.isPending && refineState.kind === 'failed' && (
           <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            No LaTeX source. Generate first.
+            <span>Refinement failed: {refineState.message}</span>
+            {refineAttempts < 3 && (
+              <div className={styles.noticeAction}>
+                <button
+                  type="button"
+                  onClick={handleRefineRetry}
+                  style={{
+                    font: 'inherit', fontSize: '0.875rem', fontWeight: 600,
+                    color: 'var(--color-primary)', background: 'none', border: 'none',
+                    padding: 0, cursor: 'pointer', textDecoration: 'underline',
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
           </div>
         )}
-        {!compileMutation.isPending && compileState.kind === 'compile_error' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            Compilation error: {compileState.detail}
-          </div>
-        )}
-        {!compileMutation.isPending && compileState.kind === 'timeout' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            Compilation timed out (exceeded 30 seconds).
-          </div>
-        )}
-        {!compileMutation.isPending && compileState.kind === 'storage_error' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            <span>{compileState.message}</span>
-            <div className={styles.noticeAction}>
+
+        {/* Suggestion review — Req 12.5, 12.6, 12.7 */}
+        {!refineMutation.isPending && refineState.kind === 'success' && (
+          <div className={`${styles.notice} ${styles.noticeInfo}`} role="region" aria-label="Refinement suggestion">
+            <strong>AI suggestion ready.</strong> Review the changes and choose to accept or discard.
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
               <button
                 type="button"
-                onClick={handleCompile}
-                style={{
-                  font: 'inherit',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: 'var(--color-primary)',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
+                className={styles.button}
+                onClick={() => handleAcceptSuggestion(refineState.suggestion)}
               >
-                Retry
+                Accept suggestion
+              </button>
+              <button
+                type="button"
+                className={`${styles.button} ${styles.buttonSecondary}`}
+                onClick={handleDiscardSuggestion}
+              >
+                Discard
               </button>
             </div>
+            <p style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+              Accepting will update the form fields. Changes are not saved until you click Save.
+            </p>
           </div>
         )}
       </div>
+    </section>
+  )
 
-      {/* ── Download ─────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <button
-          type="button"
+  // ── Preview & Download Panel ──────────────────────────────────────────────
+  const previewPanel = (
+    <section className={styles.section} style={{ marginTop: '2rem' }}>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Preview &amp; Download</h2>
+      </div>
+
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem' }}>
+        See your resume rendered in the selected template and download it as a PDF.
+        {resume.templateId
+          ? ''
+          : ' No template selected yet — the Classic template is used by default.'}
+      </p>
+
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+        <Link href={`/resumes/${id}/preview`} className={styles.button}>
+          Preview &amp; download
+        </Link>
+        <Link
+          href={`/templates/${id}`}
           className={`${styles.button} ${styles.buttonSecondary}`}
-          onClick={handleDownload}
-          disabled={!hasPdf || downloadState === 'loading'}
-          title={!hasPdf ? 'Compile a PDF first to enable download' : 'Download compiled PDF'}
         >
-          {downloadState === 'loading' ? 'Preparing download…' : 'Download PDF'}
-        </button>
-        {downloadState === 'error' && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
-            {downloadErrorMsg}
-          </div>
-        )}
+          Choose template
+        </Link>
       </div>
     </section>
   )
@@ -733,7 +618,7 @@ export default function ResumeEditorPage({
   return (
     <>
       <Link href="/resumes" className={styles.backLink}>
-        ← Back to resumes
+        ← Back to dashboard
       </Link>
 
       <div className={styles.pageHeader}>
@@ -749,8 +634,8 @@ export default function ResumeEditorPage({
       </div>
 
       <ResumeForm
-        key={resume.id}
-        initialData={initialData}
+        key={`${resume.id}-${draftKey}`}
+        initialData={draftData ?? initialData}
         isSaving={saveMutation.isPending}
         fieldErrors={fieldErrors}
         onSave={handleSave}
@@ -758,7 +643,9 @@ export default function ResumeEditorPage({
         saveNotice={saveNotice}
       />
 
-      {generationPanel}
+      {refinementPanel}
+
+      {previewPanel}
 
       {/* ── Sharing panel ──────────────────────────────────────────────── */}
       <div className={styles.section} style={{ marginTop: '2rem' }}>

@@ -30,9 +30,16 @@ type ProfileRow = {
   user_id: string
   full_name: string
   email: string
+  phone: string | null
+  location: string | null
+  summary: string | null
+  links: unknown
   experience: unknown
+  projects: unknown
   education: unknown
+  certifications: unknown
   skills: unknown
+  achievements: unknown
   updated_at: string
 }
 
@@ -44,9 +51,16 @@ function rowToProfile(row: ProfileRow): UserProfile {
     userId: row.user_id,
     fullName: row.full_name,
     email: row.email,
+    phone: row.phone ?? '',
+    location: row.location ?? '',
+    summary: row.summary ?? '',
+    links: (row.links as UserProfile['links']) ?? [],
     experience: row.experience as UserProfile['experience'],
+    projects: (row.projects as UserProfile['projects']) ?? [],
     education: row.education as UserProfile['education'],
+    certifications: (row.certifications as UserProfile['certifications']) ?? [],
     skills: row.skills as UserProfile['skills'],
+    achievements: (row.achievements as UserProfile['achievements']) ?? [],
     updatedAt: row.updated_at,
   }
 }
@@ -118,9 +132,16 @@ export async function saveProfile(
         user_id: userId,
         full_name: data.fullName,
         email: data.email,
+        phone: data.phone,
+        location: data.location,
+        summary: data.summary,
+        links: data.links,
         experience: data.experience,
+        projects: data.projects,
         education: data.education,
+        certifications: data.certifications,
         skills: data.skills,
+        achievements: data.achievements,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' }

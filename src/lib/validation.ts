@@ -40,6 +40,22 @@ const educationEntrySchema = z.object({
   description: z.string().max(2000, 'Must be 2,000 characters or fewer'),
 })
 
+const projectEntrySchema = z.object({
+  name:        z.string().max(200, 'Must be 200 characters or fewer'),
+  description: z.string().max(2000, 'Must be 2,000 characters or fewer'),
+  techStack:   z
+    .array(z.string().max(100, 'Each technology must be 100 characters or fewer'))
+    .max(30, 'A project may list at most 30 technologies'),
+  liveUrl:     z.string().max(300, 'Link must be 300 characters or fewer'),
+  repoUrl:     z.string().max(300, 'Link must be 300 characters or fewer'),
+})
+
+const certificationEntrySchema = z.object({
+  name:   z.string().max(200, 'Must be 200 characters or fewer'),
+  issuer: z.string().max(200, 'Must be 200 characters or fewer'),
+  year:   z.string().max(20, 'Must be 20 characters or fewer'),
+})
+
 // ─── Root schema ─────────────────────────────────────────────────────────────
 
 /**
@@ -65,19 +81,68 @@ export const resumeDataSchema = z.object({
     .email('Must be a valid email address')
     .max(254, 'Email must be 254 characters or fewer'),
 
+  phone: z
+    .string()
+    .max(50, 'Phone must be 50 characters or fewer')
+    .default(''),
+
+  location: z
+    .string()
+    .max(200, 'Location must be 200 characters or fewer')
+    .default(''),
+
+  summary: z
+    .string()
+    .max(2000, 'Summary must be 2,000 characters or fewer')
+    .default(''),
+
+  links: z
+    .array(
+      z.object({
+        type: z.enum([
+          'website',
+          'linkedin',
+          'github',
+          'leetcode',
+          'twitter',
+          'dribbble',
+          'medium',
+          'other',
+        ]),
+        url: z.string().max(300, 'Link must be 300 characters or fewer'),
+      })
+    )
+    .max(15, 'You may add at most 15 links')
+    .default([]),
+
   experience: z
     .array(experienceEntrySchema)
     .max(50, 'Experience may have at most 50 entries'),
 
+  projects: z
+    .array(projectEntrySchema)
+    .max(50, 'Projects may have at most 50 entries')
+    .default([]),
+
   education: z
     .array(educationEntrySchema)
     .max(50, 'Education may have at most 50 entries'),
+
+  certifications: z
+    .array(certificationEntrySchema)
+    .max(50, 'Certifications may have at most 50 entries')
+    .default([]),
 
   skills: z
     .array(
       z.string().max(200, 'Each skill must be 200 characters or fewer')
     )
     .max(50, 'Skills may have at most 50 entries'),
+
+  achievements: z
+    .array(z.string().max(500, 'Each achievement must be 500 characters or fewer'))
+    .max(50, 'Achievements may have at most 50 entries')
+    .default([]),
 })
 
 // ─── Validation function ──────────────────────────────────────────────────────

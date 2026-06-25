@@ -25,14 +25,51 @@ export type EducationEntry = {
   description: string  // <= 2000 chars
 }
 
+/** Supported social / profile link types (drives which icon is rendered). */
+export type LinkType =
+  | 'website'
+  | 'linkedin'
+  | 'github'
+  | 'leetcode'
+  | 'twitter'
+  | 'dribbble'
+  | 'medium'
+  | 'other'
+
+export type ResumeLink = {
+  type: LinkType
+  url: string // <= 300 chars
+}
+
+export type ProjectEntry = {
+  name: string         // <= 200 chars
+  description: string  // <= 2000 chars
+  techStack: string[]  // technologies used, each <= 100 chars
+  liveUrl: string      // <= 300 chars
+  repoUrl: string      // <= 300 chars
+}
+
+export type CertificationEntry = {
+  name: string    // <= 200 chars
+  issuer: string  // <= 200 chars
+  year: string    // <= 20 chars
+}
+
 // ─── Core data shape ─────────────────────────────────────────────────────
 
 export type ResumeData = {
   fullName: string         // required, <= 200 chars
   email: string            // required, valid format, <= 254 chars
+  phone: string            // optional, <= 50 chars
+  location: string         // optional, <= 200 chars
+  summary: string          // optional, <= 2000 chars
+  links: ResumeLink[]      // <= 15 entries
   experience: ExperienceEntry[] // <= 50 entries
+  projects: ProjectEntry[]      // <= 50 entries
   education: EducationEntry[]   // <= 50 entries
+  certifications: CertificationEntry[] // <= 50 entries
   skills: string[]              // <= 50 entries, each <= 200 chars
+  achievements: string[]        // <= 50 entries, each <= 500 chars
 }
 
 // ─── Persisted entities ───────────────────────────────────────────────────
@@ -47,9 +84,10 @@ export type Template = {
   id: string
   name: string
   roleCategory: string
-  previewPath: string
-  latexScaffold: string
-  isDefault: boolean
+  /** One-line description of the look and feel. */
+  description: string
+  /** Accent color (CSS color) used by the rendered document. */
+  accent: string
 }
 
 export type Resume = ResumeData & {

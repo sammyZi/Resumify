@@ -42,9 +42,16 @@ type ResumeRow = {
   template_id: string | null
   full_name: string
   email: string
+  phone: string | null
+  location: string | null
+  summary: string | null
+  links: unknown
   experience: unknown
+  projects: unknown
   education: unknown
+  certifications: unknown
   skills: unknown
+  achievements: unknown
   latex_source: string | null
   pdf_path: string | null
 }
@@ -58,9 +65,16 @@ function rowToResume(row: ResumeRow): Resume {
     templateId: row.template_id,
     fullName: row.full_name,
     email: row.email,
+    phone: row.phone ?? '',
+    location: row.location ?? '',
+    summary: row.summary ?? '',
+    links: (row.links as Resume['links']) ?? [],
     experience: row.experience as Resume['experience'],
+    projects: (row.projects as Resume['projects']) ?? [],
     education: row.education as Resume['education'],
+    certifications: (row.certifications as Resume['certifications']) ?? [],
     skills: row.skills as Resume['skills'],
+    achievements: (row.achievements as Resume['achievements']) ?? [],
     latexSource: row.latex_source,
     pdfPath: row.pdf_path,
   }
@@ -84,7 +98,7 @@ function rowToResume(row: ResumeRow): Resume {
  */
 export async function createResume(
   userId: string,
-  prefill?: Pick<UserProfile, 'fullName' | 'email' | 'experience' | 'education' | 'skills'>,
+  prefill?: Pick<UserProfile, 'fullName' | 'email' | 'phone' | 'location' | 'summary' | 'links' | 'experience' | 'projects' | 'education' | 'certifications' | 'skills' | 'achievements'>,
   template?: string
 ): Promise<Result<Resume, ResumeStoreError>> {
   const supabase = await createSupabaseServerClient()
@@ -95,9 +109,16 @@ export async function createResume(
     // Pre-fill from profile snapshot when provided; otherwise use empty defaults.
     full_name: prefill?.fullName ?? '',
     email: prefill?.email ?? '',
+    phone: prefill?.phone ?? '',
+    location: prefill?.location ?? '',
+    summary: prefill?.summary ?? '',
+    links: prefill?.links ?? [],
     experience: prefill?.experience ?? [],
+    projects: prefill?.projects ?? [],
     education: prefill?.education ?? [],
+    certifications: prefill?.certifications ?? [],
     skills: prefill?.skills ?? [],
+    achievements: prefill?.achievements ?? [],
     latex_source: null,
     pdf_path: null,
   }
@@ -181,9 +202,16 @@ export async function saveResumeData(
     .update({
       full_name: data.fullName,
       email: data.email,
+      phone: data.phone,
+      location: data.location,
+      summary: data.summary,
+      links: data.links,
       experience: data.experience,
+      projects: data.projects,
       education: data.education,
+      certifications: data.certifications,
       skills: data.skills,
+      achievements: data.achievements,
       updated_at: new Date().toISOString(),
     })
     .eq('id', resumeId)
@@ -312,9 +340,16 @@ export async function saveResumeDataToProfile(
   const profileResult = await saveProfile(userId, {
     fullName: resume.fullName,
     email: resume.email,
+    phone: resume.phone,
+    location: resume.location,
+    summary: resume.summary,
+    links: resume.links,
     experience: resume.experience,
+    projects: resume.projects,
     education: resume.education,
+    certifications: resume.certifications,
     skills: resume.skills,
+    achievements: resume.achievements,
   })
 
   if (!profileResult.ok) {
@@ -330,4 +365,40 @@ export async function saveResumeDataToProfile(
   }
 
   return ok(profileResult.value)
+}
+
+// ─── deleteResume ─────────────────────────────────────────────────────────────
+
+/**
+ * Permanently deletes a resume by id.
+ *
+ * RLS ensures only the owner can delete their own resume. Associated shares are
+ * removed by the ON DELETE CASCADE foreign key. Returns `not_found` when no row
+ * matched (already deleted or not owned by the caller).
+ *
+ * Requirements: 5.x (resume lifecycle)
+ */
+export async function deleteResume(
+  resumeId: string
+): Promise<Result<void, ResumeStoreError>> {
+  const supabase = await createSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from('resumes')
+    .delete()
+    .eq('id', resumeId)
+    .select('id')
+
+  if (error) {
+    return err({
+      kind: 'db_error',
+      error: { code: error.code ?? 'unknown', message: error.message },
+    })
+  }
+
+  if (!data || data.length === 0) {
+    return err({ kind: 'not_found' })
+  }
+
+  return ok(undefined)
 }

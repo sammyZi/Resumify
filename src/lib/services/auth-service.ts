@@ -360,13 +360,18 @@ export async function resendConfirmation(email: string): Promise<void> {
  *
  * Requirements: 2.1, 2.2
  */
-export async function startGoogleOAuth(): Promise<Result<{ redirectUrl: string }, AuthError>> {
+export async function startGoogleOAuth(
+  origin: string
+): Promise<Result<{ redirectUrl: string }, AuthError>> {
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback`,
+      // Must be an absolute URL. Supabase falls back to the dashboard Site URL
+      // (sending the code to "/") when this is relative or empty, which breaks
+      // the callback. Derive it from the live request origin.
+      redirectTo: `${origin}/auth/callback`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

@@ -83,9 +83,16 @@ function rowToResume(row: ResumeRow): Resume {
     templateId: row.template_id,
     fullName: row.full_name,
     email: row.email,
+    phone: (row as { phone?: string | null }).phone ?? '',
+    location: (row as { location?: string | null }).location ?? '',
+    summary: (row as { summary?: string | null }).summary ?? '',
+    links: ((row as { links?: unknown }).links as Resume['links']) ?? [],
     experience: row.experience as Resume['experience'],
+    projects: ((row as { projects?: unknown }).projects as Resume['projects']) ?? [],
     education: row.education as Resume['education'],
+    certifications: ((row as { certifications?: unknown }).certifications as Resume['certifications']) ?? [],
     skills: row.skills as Resume['skills'],
+    achievements: ((row as { achievements?: unknown }).achievements as Resume['achievements']) ?? [],
     latexSource: row.latex_source,
     pdfPath: row.pdf_path,
   }
@@ -299,9 +306,16 @@ export async function copyTemplateFromShare(
       // Resume_Data fields are explicitly empty.
       full_name: '',
       email: '',
+      phone: '',
+      location: '',
+      summary: '',
+      links: [],
       experience: [],
+      projects: [],
       education: [],
+      certifications: [],
       skills: [],
+      achievements: [],
       pdf_path: null,
     })
     .select('*')

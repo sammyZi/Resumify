@@ -1,0 +1,59 @@
+/*
+ * preview.module.css — layout + print rules for the resume preview page.
+ *
+ * On screen: a centered "paper" with a sticky toolbar. When printing, all app
+ * chrome (nav, toolbar, toasts) is hidden so only the resume document prints.
+ */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.stage {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--color-border);
+  border-radius: 12px;
+  overflow: auto;
+}
+
+.paper {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  background: #fff;
+}
+
+@media print {
+  /* Hide the workspace shell and this page's controls. */
+  :global(nav),
+  .toolbar,
+  :global([role='status']),
+  :global([aria-live]) {
+    display: none !important;
+  }
+
+  :global(main) {
+    padding: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .stage {
+    padding: 0 !important;
+    background: #fff !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  .paper {
+    box-shadow: none !important;
+  }
+}

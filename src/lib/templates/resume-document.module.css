@@ -1,0 +1,638 @@
+/*
+ * resume-document.module.css — styles for the rendered resume document.
+ *
+ * The root `.doc` carries:
+ *   - data-template="<id>"        → unique per-template design
+ *   - data-structure="standard|sidebar"
+ *   - style="--accent: <color>"   → injected accent color
+ *
+ * Dimensions approximate US Letter (8.5in × 11in) so the on-screen preview
+ * matches the printed PDF.
+ */
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+
+.doc {
+  --accent: #1f2937;
+  box-sizing: border-box;
+  width: 8.5in;
+  min-height: 11in;
+  padding: 0.75in 0.8in;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.doc * {
+  box-sizing: border-box;
+}
+
+.header {
+  margin-bottom: 1.25rem;
+}
+
+.name {
+  font-size: 26pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.contact {
+  margin-top: 0.4rem;
+  font-size: 10pt;
+  color: #4b5563;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+}
+
+.contactItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.contactItem svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.links {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  font-size: 9.5pt;
+  color: var(--accent);
+}
+
+.linkItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.linkItem svg {
+  flex-shrink: 0;
+}
+
+.summary {
+  font-size: 10pt;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+.projectLinks {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 9pt;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.techStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.techTag {
+  font-size: 8.5pt;
+  padding: 0.08rem 0.4rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 12%, #f3f4f6);
+  color: color-mix(in srgb, var(--accent) 75%, #111827);
+}
+
+.bulletList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 10pt;
+  color: #374151;
+}
+
+.bulletList li {
+  margin-bottom: 0.2rem;
+}
+
+.section {
+  margin-top: 1.1rem;
+}
+
+.sectionTitle {
+  font-size: 12pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.entry {
+  margin-bottom: 0.75rem;
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+.entryTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.entryTitle {
+  font-weight: 600;
+  font-size: 11pt;
+}
+
+.entryOrg {
+  color: #374151;
+  font-size: 10.5pt;
+  font-weight: 400;
+}
+
+.entryDates {
+  color: #6b7280;
+  font-size: 9.5pt;
+  white-space: nowrap;
+}
+
+.entryDesc {
+  margin-top: 0.2rem;
+  font-size: 10pt;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.skill {
+  font-size: 9.5pt;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, #e5e7eb);
+  border-radius: 9999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.empty {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 10pt;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: CLASSIC — centered serif, hairline rules                         */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='classic'] {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.doc[data-template='classic'] .header {
+  text-align: center;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 0.75rem;
+}
+
+.doc[data-template='classic'] .contact,
+.doc[data-template='classic'] .links {
+  justify-content: center;
+}
+
+.doc[data-template='classic'] .sectionTitle {
+  border-bottom-width: 1px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: MODERN — full-width accent header band                           */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='modern'] {
+  padding: 0;
+}
+
+.doc[data-template='modern'] .header {
+  background: var(--accent);
+  color: #ffffff;
+  padding: 0.7in 0.8in 0.5in;
+  margin-bottom: 0;
+}
+
+.doc[data-template='modern'] .name {
+  color: #ffffff;
+}
+
+.doc[data-template='modern'] .contact {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.doc[data-template='modern'] .section {
+  padding: 0 0.8in;
+}
+
+.doc[data-template='modern'] .section:first-of-type {
+  margin-top: 1rem;
+}
+
+.doc[data-template='modern'] .sectionTitle {
+  border-bottom: none;
+  border-left: 4px solid var(--accent);
+  padding-left: 0.5rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: MINIMAL — airy, tiny uppercase labels, no rules                  */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='minimal'] {
+  padding: 1in 1in;
+}
+
+.doc[data-template='minimal'] .name {
+  font-weight: 500;
+  color: #111827;
+  letter-spacing: 0.02em;
+}
+
+.doc[data-template='minimal'] .section {
+  margin-top: 1.6rem;
+}
+
+.doc[data-template='minimal'] .sectionTitle {
+  border-bottom: none;
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 9pt;
+  letter-spacing: 0.22em;
+}
+
+.doc[data-template='minimal'] .skill {
+  border: none;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 4px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: TECHNICAL — monospace headings, left-border markers              */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='technical'] .name,
+.doc[data-template='technical'] .sectionTitle,
+.doc[data-template='technical'] .entryDates {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+}
+
+.doc[data-template='technical'] .sectionTitle {
+  font-size: 10.5pt;
+  border-bottom: none;
+  border-left: 3px solid var(--accent);
+  padding-left: 0.5rem;
+  letter-spacing: 0.04em;
+}
+
+.doc[data-template='technical'] .entry {
+  padding-left: 0.5rem;
+  border-left: 1px dashed #d1d5db;
+}
+
+.doc[data-template='technical'] .skill {
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: ELEGANT — serif, centered name, letter-spaced double rule        */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='elegant'] {
+  font-family: "Iowan Old Style", Palatino, Georgia, serif;
+  padding: 0.85in 0.95in;
+}
+
+.doc[data-template='elegant'] .header {
+  text-align: center;
+  margin-bottom: 1.6rem;
+}
+
+.doc[data-template='elegant'] .contact,
+.doc[data-template='elegant'] .links {
+  justify-content: center;
+}
+
+.doc[data-template='elegant'] .name {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #1a1a1a;
+}
+
+.doc[data-template='elegant'] .contact {
+  letter-spacing: 0.04em;
+}
+
+.doc[data-template='elegant'] .sectionTitle {
+  text-align: center;
+  border-bottom: 3px double color-mix(in srgb, var(--accent) 55%, #d1d5db);
+  color: var(--accent);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
+.doc[data-template='elegant'] .entryTop {
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.1rem;
+}
+
+.doc[data-template='elegant'] .entryDesc {
+  text-align: center;
+}
+
+.doc[data-template='elegant'] .skills {
+  justify-content: center;
+}
+
+.doc[data-template='elegant'] .skill {
+  border-radius: 2px;
+  background: transparent;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: BOLD — oversized name on accent block, pill section titles       */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='bold'] {
+  padding: 0;
+}
+
+.doc[data-template='bold'] .header {
+  background: var(--accent);
+  color: #ffffff;
+  padding: 0.9in 0.8in 0.7in;
+  margin-bottom: 1rem;
+}
+
+.doc[data-template='bold'] .name {
+  color: #ffffff;
+  font-size: 34pt;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.doc[data-template='bold'] .contact {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11pt;
+}
+
+.doc[data-template='bold'] .section {
+  padding: 0 0.8in;
+  margin-top: 1.25rem;
+}
+
+.doc[data-template='bold'] .sectionTitle {
+  display: inline-block;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.2rem 0.7rem;
+  font-size: 10.5pt;
+}
+
+.doc[data-template='bold'] .entryTitle {
+  font-size: 12pt;
+  font-weight: 700;
+}
+
+.doc[data-template='bold'] .skill {
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: TIMELINE — vertical line with markers down the entries           */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='timeline'] .sectionTitle {
+  border-bottom: none;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 30%, #e5e7eb);
+}
+
+.doc[data-template='timeline'] .entry {
+  position: relative;
+  padding-left: 1.1rem;
+  padding-bottom: 0.4rem;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, #e5e7eb);
+  margin-left: 0.25rem;
+}
+
+.doc[data-template='timeline'] .entry:last-child {
+  border-left-color: transparent;
+}
+
+.doc[data-template='timeline'] .entry::before {
+  content: '';
+  position: absolute;
+  left: -0.34rem;
+  top: 0.35rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Template: COMPACT — dense, small type                                      */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-template='compact'] {
+  padding: 0.55in 0.6in;
+  font-size: 10pt;
+  line-height: 1.3;
+}
+
+.doc[data-template='compact'] .name {
+  font-size: 19pt;
+}
+
+.doc[data-template='compact'] .section {
+  margin-top: 0.7rem;
+}
+
+.doc[data-template='compact'] .sectionTitle {
+  font-size: 10pt;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.1rem;
+  border-bottom-width: 1px;
+}
+
+.doc[data-template='compact'] .entry {
+  margin-bottom: 0.4rem;
+}
+
+.doc[data-template='compact'] .entryDesc {
+  font-size: 9pt;
+}
+
+.doc[data-template='compact'] .skill {
+  font-size: 8.5pt;
+  padding: 0.1rem 0.4rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+/* Sidebar base (data-structure='sidebar')                                    */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.doc[data-structure='sidebar'] {
+  padding: 0;
+  display: flex;
+}
+
+.sidebar {
+  width: 35%;
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 0.75in 0.45in;
+}
+
+.sidebarName {
+  font-size: 19pt;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.sidebarContact {
+  margin-top: 0.4rem;
+  font-size: 9.5pt;
+  color: rgba(255, 255, 255, 0.85);
+  word-break: break-word;
+}
+
+.sidebarContactList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 9.5pt;
+}
+
+.sidebarContactList .contactItem {
+  align-items: flex-start;
+  gap: 0.4rem;
+  word-break: break-word;
+}
+
+.sidebarContactList .contactItem svg {
+  margin-top: 0.15rem;
+  opacity: 0.9;
+}
+
+.sidebarTitle {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 11pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  padding-bottom: 0.2rem;
+}
+
+.sidebarSkills {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 10pt;
+}
+
+.sidebarSkills li {
+  position: relative;
+  padding-left: 0.85rem;
+}
+
+.sidebarSkills li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar .empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.main {
+  flex: 1;
+  padding: 0.75in 0.6in;
+  min-width: 0;
+}
+
+.main .section:first-child {
+  margin-top: 0;
+}
+
+/* Template: AURORA — indigo left sidebar (uses sidebar base as-is). */
+
+/* Template: MERIDIAN — right charcoal sidebar, serif main column. */
+
+.doc[data-template='meridian'] .sidebar {
+  order: 2;
+}
+
+.doc[data-template='meridian'] .main {
+  order: 1;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.doc[data-template='meridian'] .main .sectionTitle {
+  font-family: Georgia, "Times New Roman", serif;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, #d1d5db);
+}
+
+/* ── Print ───────────────────────────────────────────────────────────────── */
+
+@media print {
+  .doc {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .sidebar,
+  .doc[data-template='modern'] .header,
+  .doc[data-template='bold'] .header {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -61,9 +61,16 @@ async function saveProfile(body: ResumeData): Promise<SaveResult> {
 const emptyProfile: ResumeData = {
   fullName: '',
   email: '',
+  phone: '',
+  location: '',
+  summary: '',
+  links: [],
   experience: [],
+  projects: [],
   education: [],
+  certifications: [],
   skills: [],
+  achievements: [],
 }
 
 // ── Page component ────────────────────────────────────────────────────────────
@@ -155,9 +162,16 @@ export default function ProfilePage() {
     ? {
         fullName: profile.fullName,
         email: profile.email,
+        phone: profile.phone,
+        location: profile.location,
+        summary: profile.summary,
+        links: profile.links,
         experience: profile.experience,
+        projects: profile.projects,
         education: profile.education,
+        certifications: profile.certifications,
         skills: profile.skills,
+        achievements: profile.achievements,
       }
     : emptyProfile
 
@@ -204,7 +218,12 @@ export default function ProfilePage() {
   return (
     <>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Profile</h1>
+        <div>
+          <h1 className={styles.pageTitle}>Profile</h1>
+          <p className={styles.pageSubtitle}>
+            Your master details. New resumes are pre-filled from here.
+          </p>
+        </div>
       </div>
 
       {!profile && (

@@ -20,7 +20,9 @@
   gap: 1.5rem;
   padding: 0 1.5rem;
   height: 3.5rem;
-  background: var(--color-surface);
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  -webkit-backdrop-filter: saturate(1.4) blur(8px);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
@@ -28,11 +30,21 @@
 }
 
 .navBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
   margin-right: 0.5rem;
+}
+
+.navBrandMark {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 8px;
 }
 
 .navLinks {
@@ -89,6 +101,35 @@
   border-color: var(--color-text-secondary);
 }
 
+.signOutButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.signOutButton:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
+  background: var(--color-border);
+}
+
+@media (max-width: 560px) {
+  .signOutLabel {
+    display: none;
+  }
+}
+
 /* ─── Page / Content area ────────────────────────────────────────────────── */
 
 .main {
@@ -115,6 +156,12 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
+}
+
+.pageSubtitle {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.25rem;
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
@@ -224,6 +271,165 @@
   font-size: 0.9375rem;
 }
 
+/* ─── Dashboard card grid ────────────────────────────────────────────────── */
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.dashboardCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.dashboardCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  transform: translateY(-2px);
+}
+
+.dashboardCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboardCardTopRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardDeleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.cardDeleteButton:hover:not(:disabled) {
+  color: #dc2626;
+  border-color: #dc2626;
+  background: color-mix(in srgb, #dc2626 8%, transparent);
+}
+
+.cardDeleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent);
+  white-space: nowrap;
+}
+
+.statusBadgeReady {
+  color: #166534;
+  background: color-mix(in srgb, #16a34a 14%, transparent);
+}
+
+.dashboardCardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboardCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.metaChip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: 0.1875rem 0.5rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+.emptyIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+.emptyTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.skeletonCard {
+  height: 9.5rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--color-border) 40%, var(--color-surface)) 30%,
+    color-mix(in srgb, var(--color-border) 70%, var(--color-surface)) 50%,
+    color-mix(in srgb, var(--color-border) 40%, var(--color-surface)) 70%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
 /* ─── Form ───────────────────────────────────────────────────────────────── */
 
 .form {
@@ -236,6 +442,10 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
 }
 
 .sectionHeader {
@@ -391,6 +601,56 @@
   flex: 1;
 }
 
+/* ─── Link editor rows ───────────────────────────────────────────────────── */
+
+.linkRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.linkTypeSelect {
+  width: 9.5rem;
+  flex-shrink: 0;
+}
+
+.linkUrlInput {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Achievements list ──────────────────────────────────────────────────── */
+
+.achievementList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.achievementItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 560px) {
+  .linkRow {
+    flex-wrap: wrap;
+  }
+  .linkTypeSelect {
+    width: 100%;
+  }
+}
+
 /* ─── Notices ────────────────────────────────────────────────────────────── */
 
 .notice {
@@ -430,8 +690,13 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--color-border);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  position: sticky;
+  bottom: 1rem;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
 }
 
 /* ─── Loading / skeleton ─────────────────────────────────────────────────── */
@@ -502,8 +767,9 @@
 
 .galleryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, 200px);
+  justify-content: center;
+  gap: 1.25rem;
 }
 
 .templateCard {
@@ -529,19 +795,65 @@
 
 .templateCardPreview {
   aspect-ratio: 8.5 / 11;
-  background: color-mix(in srgb, var(--color-border) 40%, var(--color-surface));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  padding: 1rem;
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  width: 100%;
+  cursor: pointer;
+  display: block;
 }
 
-.templateCardPreview svg {
-  opacity: 0.4;
+.templateThumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 816px; /* 8.5in at 96dpi */
+  transform: scale(0.245);
+  transform-origin: top left;
+  pointer-events: none;
+  user-select: none;
+}
+
+.templateThumbHint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.72);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.templateCardPreview:hover .templateThumbHint,
+.templateCardPreview:focus-visible .templateThumbHint {
+  opacity: 1;
+}
+
+.templateCardDesc {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.templateCardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.templateCardActions .templateCardApplyButton {
+  flex: 1;
+  margin-top: 0;
 }
 
 .templateCardBody {

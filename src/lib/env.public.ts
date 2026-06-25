@@ -10,8 +10,7 @@
  * Requirements: 9.1, 10.1
  */
 
-function requirePublicEnv(name: string): string {
-  const value = process.env[name]
+function requirePublicEnv(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(
       `Missing required public environment variable: ${name}. ` +
@@ -23,8 +22,16 @@ function requirePublicEnv(name: string): string {
 
 export const publicEnv = {
   /** Supabase project URL — safe for the browser. */
-  supabaseUrl: requirePublicEnv('NEXT_PUBLIC_SUPABASE_URL'),
+  supabaseUrl: requirePublicEnv(
+    'NEXT_PUBLIC_SUPABASE_URL',
+    // Static reference (not dynamic indexing) so Next.js inlines it into the
+    // client bundle at build time.
+    process.env.NEXT_PUBLIC_SUPABASE_URL
+  ),
 
   /** Supabase anon/public API key — safe for the browser. */
-  supabaseAnonKey: requirePublicEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+  supabaseAnonKey: requirePublicEnv(
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ),
 } as const

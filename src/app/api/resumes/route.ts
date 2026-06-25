@@ -25,9 +25,16 @@ type ResumeRow = {
   template_id: string | null
   full_name: string
   email: string
+  phone: string | null
+  location: string | null
+  summary: string | null
+  links: unknown
   experience: unknown
+  projects: unknown
   education: unknown
+  certifications: unknown
   skills: unknown
+  achievements: unknown
   latex_source: string | null
   pdf_path: string | null
 }
@@ -39,9 +46,16 @@ function rowToResume(row: ResumeRow): Resume {
     templateId: row.template_id,
     fullName: row.full_name,
     email: row.email,
+    phone: row.phone ?? '',
+    location: row.location ?? '',
+    summary: row.summary ?? '',
+    links: (row.links as Resume['links']) ?? [],
     experience: row.experience as Resume['experience'],
+    projects: (row.projects as Resume['projects']) ?? [],
     education: row.education as Resume['education'],
+    certifications: (row.certifications as Resume['certifications']) ?? [],
     skills: row.skills as Resume['skills'],
+    achievements: (row.achievements as Resume['achievements']) ?? [],
     latexSource: row.latex_source,
     pdfPath: row.pdf_path,
   }
@@ -109,9 +123,16 @@ export async function POST(request: Request) {
     prefill = {
       fullName: p.fullName,
       email: p.email,
+      phone: p.phone,
+      location: p.location,
+      summary: p.summary,
+      links: p.links,
       experience: p.experience,
+      projects: p.projects,
       education: p.education,
+      certifications: p.certifications,
       skills: p.skills,
+      achievements: p.achievements,
     }
   }
 

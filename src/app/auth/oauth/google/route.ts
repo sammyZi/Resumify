@@ -13,10 +13,11 @@
  */
 
 import { redirect } from 'next/navigation'
+import type { NextRequest } from 'next/server'
 import { startGoogleOAuth } from '@/lib/services/auth-service'
 
-export async function GET() {
-  const result = await startGoogleOAuth()
+export async function GET(request: NextRequest) {
+  const result = await startGoogleOAuth(request.nextUrl.origin)
 
   if (!result.ok) {
     redirect('/login?error=oauth_failed')

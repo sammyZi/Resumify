@@ -1,8 +1,8 @@
 /**
  * route.ts — GET /api/templates
  *
- * GET /api/templates               — list all templates
- * GET /api/templates?roleCategory= — list templates filtered by role category
+ * Returns the predefined, code-based templates (see lib/templates/registry).
+ * Optional ?roleCategory= filters by exact category match.
  *
  * Requires an authenticated session. Unauthenticated requests receive
  * HTTP 401 { error: 'Unauthorized' }.
@@ -14,7 +14,7 @@
 
 import type { NextRequest } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { listTemplates } from '@/lib/services/template-service'
+import { TEMPLATES } from '@/lib/templates/registry'
 
 // ─── GET /api/templates ───────────────────────────────────────────────────────
 
@@ -28,10 +28,12 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Read optional ?roleCategory= query param.
   const roleCategory = request.nextUrl.searchParams.get('roleCategory') ?? undefined
 
-  const templates = await listTemplates(roleCategory)
+  const templates =
+    roleCategory !== undefined
+      ? TEMPLATES.filter((t) => t.roleCategory === roleCategory)
+      : TEMPLATES
 
   return Response.json({ templates })
 }
