@@ -126,6 +126,8 @@ export type ResolvedShare = {
   templateId: string | null
   /** Present for kind='template' shares — the raw LaTeX scaffold string. */
   latexScaffold: string | null
+  /** Present for kind='recruiter' shares — the full resume content to render. */
+  resumeData: ResumeData | null
 }
 
 // ─── Store input types ────────────────────────────────────────────────────

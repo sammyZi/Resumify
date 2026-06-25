@@ -180,11 +180,12 @@ export async function resolveShare(
     })
   }
 
-  // 3. Fetch only the columns we need from the resume based on share kind.
-  //    Deliberately select a narrow column list — never include Resume_Data fields.
+  // 3. Fetch resume columns based on share kind.
+  //    - recruiter: full resume content so the page can render the resume.
+  //    - template:  only structural fields (never Resume_Data).
   const selectColumns =
     share.kind === 'recruiter'
-      ? 'id, user_id, pdf_path'
+      ? '*'
       : 'id, user_id, template_id, latex_source'
 
   const { data: resumeData, error: resumeError } = await supabase
@@ -200,22 +201,36 @@ export async function resolveShare(
     })
   }
 
+  // 4. Build ResolvedShare with only the access-level-appropriate fields.
+  if (share.kind === 'recruiter') {
+    const resume = rowToResume(resumeData as unknown as ResumeRow)
+    return ok({
+      share,
+      pdfPath: resume.pdfPath,
+      templateId: resume.templateId,
+      latexScaffold: null,
+      resumeData: {
+        fullName: resume.fullName,
+        email: resume.email,
+        phone: resume.phone,
+        location: resume.location,
+        summary: resume.summary,
+        links: resume.links,
+        experience: resume.experience,
+        projects: resume.projects,
+        education: resume.education,
+        certifications: resume.certifications,
+        skills: resume.skills,
+        achievements: resume.achievements,
+      },
+    })
+  }
+
   const resume = resumeData as unknown as {
     id: string
     user_id: string
-    pdf_path?: string | null
     template_id?: string | null
     latex_source?: string | null
-  }
-
-  // 4. Build ResolvedShare with only the access-level-appropriate fields.
-  if (share.kind === 'recruiter') {
-    return ok({
-      share,
-      pdfPath: resume.pdf_path ?? null,
-      templateId: null,
-      latexScaffold: null,
-    })
   }
 
   // kind === 'template'
@@ -224,6 +239,7 @@ export async function resolveShare(
     pdfPath: null,
     templateId: resume.template_id ?? null,
     latexScaffold: resume.latex_source ?? null,
+    resumeData: null,
   })
 }
 

@@ -1,0 +1,69 @@
+/* shared-resume-view.module.css — public recruiter resume view + print rules. */
+
+.wrap {
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.5rem;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.downloadBtn {
+  padding: 0.5rem 1.1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.downloadBtn:hover {
+  filter: brightness(1.07);
+}
+
+.stage {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: var(--color-border);
+  overflow: auto;
+}
+
+.paper {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  background: #fff;
+}
+
+@media print {
+  .toolbar {
+    display: none !important;
+  }
+  .stage {
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+  .paper {
+    box-shadow: none !important;
+  }
+}
