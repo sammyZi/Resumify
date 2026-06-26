@@ -2,61 +2,95 @@
 
 .wrap {
   min-height: 100vh;
-  background: var(--color-background);
+  background: var(--color-background, #090d16);
+  display: flex;
+  flex-direction: column;
 }
 
 .toolbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.875rem 1.5rem;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  padding: 0.875rem 2rem;
+  background: color-mix(in srgb, var(--color-surface, #111827) 85%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border, #1f2937);
 }
 
 .brand {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text-secondary, #9ca3af);
+}
+
+.brandIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--color-primary, #3b82f6);
+  color: var(--color-primary-text, #fff);
+  font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-text-primary);
 }
 
 .downloadBtn {
-  padding: 0.5rem 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-primary-text);
-  background: var(--color-primary);
-  border: none;
-  border-radius: 8px;
+  color: var(--color-primary-text, #fff);
+  background: var(--color-primary, #3b82f6);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 80%, #000);
+  border-radius: 10px;
   cursor: pointer;
-  transition: filter 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .downloadBtn:hover {
-  filter: brightness(1.07);
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.downloadBtn:active {
+  transform: translateY(0);
 }
 
 .stage {
+  flex: 1;
   display: flex;
   justify-content: center;
-  padding: 2rem 1.5rem;
-  background: var(--color-border);
+  padding: 3rem 1.5rem 5rem;
   overflow: auto;
 }
 
 .paper {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   background: #fff;
+  border: 1px solid var(--color-border, #1f2937);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
 }
 
 @media print {
   .toolbar {
     display: none !important;
+  }
+  .wrap {
+    background: #fff !important;
   }
   .stage {
     padding: 0 !important;
@@ -64,6 +98,7 @@
     overflow: visible !important;
   }
   .paper {
-    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
   }
 }

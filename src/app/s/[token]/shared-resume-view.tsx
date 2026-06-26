@@ -11,6 +11,14 @@ import type { ResumeData } from '@/lib/types'
 import { ResumeDocument } from '@/lib/templates/resume-document'
 import styles from './shared-resume-view.module.css'
 
+const IconDownload = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+)
+
 export function SharedResumeView({
   templateId,
   data,
@@ -20,20 +28,26 @@ export function SharedResumeView({
 }) {
   return (
     <div className={styles.wrap}>
-      <div className={styles.toolbar}>
-        <span className={styles.brand}>
-          {data.fullName ? `${data.fullName}'s résumé` : 'Résumé'}
-        </span>
-        <button type="button" className={styles.downloadBtn} onClick={() => window.print()}>
-          Download PDF
+      <header className={styles.toolbar}>
+        <div className={styles.brand}>
+          <span className={styles.brandIcon} aria-hidden="true">R</span>
+          <span>Shared Resume</span>
+        </div>
+        <button
+          type="button"
+          className={styles.downloadBtn}
+          onClick={() => window.print()}
+        >
+          <IconDownload />
+          <span>Download PDF</span>
         </button>
-      </div>
+      </header>
 
-      <div className={styles.stage}>
+      <main className={styles.stage}>
         <div className={styles.paper}>
           <ResumeDocument templateId={templateId} data={data} />
         </div>
-      </div>
+      </main>
     </div>
   )
 }

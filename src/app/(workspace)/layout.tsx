@@ -82,10 +82,7 @@ function UserMenu({ onSignOutRequest }: { onSignOutRequest: () => void }) {
 
       {open && (
         <div className={styles.userMenuDropdown} role="menu">
-          <div className={styles.userMenuRow}>
-            <ThemeToggle />
-            <span className={styles.userMenuLabel}>Theme</span>
-          </div>
+          <ThemeToggle asMenuItem />
           <div className={styles.userMenuDivider} />
           <button
             type="button"

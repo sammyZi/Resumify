@@ -125,7 +125,13 @@ type ViewTransitionDocument = Document & {
   startViewTransition?: (cb: () => void) => { ready: Promise<void> }
 }
 
-export function ThemeToggle({ className = '' }: { className?: string }) {
+export function ThemeToggle({
+  className = '',
+  asMenuItem = false,
+}: {
+  className?: string
+  asMenuItem?: boolean
+}) {
   const { theme, setTheme } = useThemeStore()
   const [mounted, setMounted] = useState(false)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -194,6 +200,23 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
         )
       })
     })
+  }
+
+  if (asMenuItem) {
+    return (
+      <button
+        ref={btnRef}
+        type="button"
+        className={styles.userMenuItem}
+        onClick={toggle}
+        role="menuitem"
+      >
+        <span style={{ display: 'inline-flex', color: 'var(--color-text-secondary)' }}>
+          {mounted && dark ? <SunIcon /> : <MoonIcon />}
+        </span>
+        <span>Theme: {mounted && dark ? 'Dark' : 'Light'}</span>
+      </button>
+    )
   }
 
   return (
