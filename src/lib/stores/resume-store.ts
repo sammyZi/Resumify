@@ -77,6 +77,7 @@ function rowToResume(row: ResumeRow): Resume {
     achievements: (row.achievements as Resume['achievements']) ?? [],
     latexSource: row.latex_source,
     pdfPath: row.pdf_path,
+    title: (row as { title?: string }).title ?? '',
   }
 }
 
@@ -106,6 +107,7 @@ export async function createResume(
   const insertData = {
     user_id: userId,
     template_id: template ?? null,
+    title: '',
     // Pre-fill from profile snapshot when provided; otherwise use empty defaults.
     full_name: prefill?.fullName ?? '',
     email: prefill?.email ?? '',
@@ -401,4 +403,31 @@ export async function deleteResume(
   }
 
   return ok(undefined)
+}
+
+// ─── renameResume ─────────────────────────────────────────────────────────────
+
+/**
+ * Updates only the full_name of a resume (lightweight rename operation).
+ * RLS ensures only the owner can rename their own resume.
+ */
+export async function renameResume(
+  resumeId: string,
+  title: string
+): Promise<Result<Resume, ResumeStoreError>> {
+  const supabase = await createSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from('resumes')
+    .update({ title: title.trim(), updated_at: new Date().toISOString() })
+    .eq('id', resumeId)
+    .select('*')
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') return err({ kind: 'not_found' })
+    return err({ kind: 'db_error', error: { code: error.code ?? 'unknown', message: error.message } })
+  }
+
+  return ok(rowToResume(data as ResumeRow))
 }

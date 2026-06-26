@@ -31,15 +31,26 @@
   background: #fff;
 }
 
+.noPrint {
+  /* visible on screen, hidden when printing */
+}
+
 @media print {
+  .noPrint {
+    display: none !important;
+  }
   /* Hide the workspace shell and this page's controls. */
   :global(nav),
+  :global(a.backLink),
   .toolbar,
   :global([role='status']),
-  :global([aria-live]) {
+  :global([aria-live]),
+  :global([class*='backLink']),
+  :global([class*='notice']) {
     display: none !important;
   }
 
+  :global(body > div),
   :global(main) {
     padding: 0 !important;
     max-width: none !important;

@@ -58,6 +58,7 @@ function rowToResume(row: ResumeRow): Resume {
     achievements: (row.achievements as Resume['achievements']) ?? [],
     latexSource: row.latex_source,
     pdfPath: row.pdf_path,
+    title: (row as { title?: string }).title ?? '',
   }
 }
 

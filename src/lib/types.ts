@@ -93,6 +93,8 @@ export type Template = {
 export type Resume = ResumeData & {
   id: string
   userId: string
+  /** User-facing label for the resume (independent of fullName). Falls back to fullName when empty. */
+  title: string
   templateId: string | null
   latexSource: string | null
   pdfPath: string | null

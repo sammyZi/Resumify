@@ -3,18 +3,16 @@
 /**
  * resumes/page.tsx — Dashboard.
  *
- * The user's home base after login. Lists all resumes fetched via
- * GET /api/resumes and provides a "New resume" action (POST /api/resumes).
- * Handles loading, error and empty states.
- *
- * Note: the route stays /resumes (referenced by the root redirect, nav and
- * editor navigation); the user-facing name is "Dashboard".
+ * Lists all the user's resumes. Each card has a three-dot menu with:
+ *   Share   — creates a recruiter share link and copies it to the clipboard
+ *   Rename  — inline modal to update the resume's name (fullName)
+ *   Delete  — confirmation modal
  *
  * Requirements: 5.2, 5.3, 11.4, 11.5
  */
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
@@ -22,17 +20,16 @@ import { useUIStore } from '@/lib/stores/ui-store'
 import type { Resume } from '@/lib/types'
 import { getTemplateMeta } from '@/lib/templates/registry'
 import { ConfirmModal } from '../_components/confirm-modal'
+import { CardMenu } from '../_components/card-menu'
 import styles from '../_components/workspace-ui.module.css'
+
+// ── API helpers ───────────────────────────────────────────────────────────────
 
 async function fetchResumes(): Promise<Resume[]> {
   const res = await fetch('/api/resumes')
-  if (res.status === 401) {
-    window.location.href = '/login'
-    return []
-  }
+  if (res.status === 401) { window.location.href = '/login'; return [] }
   if (!res.ok) throw new Error('Failed to load resumes')
-  const data = await res.json()
-  return data.resumes as Resume[]
+  return (await res.json()).resumes as Resume[]
 }
 
 async function createResume(): Promise<Resume> {
@@ -41,25 +38,39 @@ async function createResume(): Promise<Resume> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
   })
-  if (res.status === 401) {
-    window.location.href = '/login'
-    throw new Error('Unauthorized')
-  }
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
   if (!res.ok) throw new Error('Failed to create resume')
-  const data = await res.json()
-  return data.resume as Resume
+  return (await res.json()).resume as Resume
 }
 
 async function deleteResume(id: string): Promise<void> {
   const res = await fetch(`/api/resumes/${id}`, { method: 'DELETE' })
-  if (res.status === 401) {
-    window.location.href = '/login'
-    throw new Error('Unauthorized')
-  }
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
   if (!res.ok) throw new Error('Failed to delete resume')
 }
 
-/** Build up-to-two-letter initials from a name (falls back to a glyph). */
+async function renameResume(id: string, title: string): Promise<void> {
+  const res = await fetch(`/api/resumes/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title }),
+  })
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
+  if (!res.ok) throw new Error('Failed to rename resume')
+}
+
+async function shareResume(resumeId: string): Promise<string> {
+  const res = await fetch('/api/shares', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resumeId, kind: 'recruiter' }),
+  })
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
+  if (!res.ok) throw new Error('Failed to create share link')
+  const { share } = await res.json()
+  return `${window.location.origin}/s/${share.token}`
+}
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '—'
@@ -67,13 +78,95 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
+// ── Rename modal ──────────────────────────────────────────────────────────────
+
+function RenameModal({
+  current,
+  onConfirm,
+  onCancel,
+  isPending,
+}: {
+  current: string
+  onConfirm: (name: string) => void
+  onCancel: () => void
+  isPending: boolean
+}) {
+  const [value, setValue] = useState(current)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    inputRef.current?.select()
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) { if (e.key === 'Escape') onCancel() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onCancel])
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (value.trim()) onConfirm(value.trim())
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', background: 'color-mix(in srgb, var(--color-text-primary) 40%, transparent)', backdropFilter: 'blur(3px)' }}
+      onClick={onCancel}
+    >
+      <form
+        style={{ width: '100%', maxWidth: '22rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 24px 48px color-mix(in srgb, var(--color-text-primary) 20%, transparent)' }}
+        onSubmit={handleSubmit}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '1rem' }}>
+          Rename resume
+        </h2>
+        <input
+          ref={inputRef}
+          type="text"
+          className={styles.input}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Full name"
+          required
+          style={{ marginBottom: '1.25rem' }}
+        />
+        <div style={{ display: 'flex', gap: '0.625rem', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isPending}
+            style={{ padding: '0.5625rem 1.125rem', font: 'inherit', fontSize: '0.875rem', fontWeight: 600, borderRadius: '10px', cursor: 'pointer', border: 'none', background: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isPending || !value.trim()}
+            className={styles.button}
+          >
+            {isPending ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function DashboardPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const addToast = useUIStore((s) => s.addToast)
 
-  // Which resume is pending deletion (null = no modal open)
   const [deleteTarget, setDeleteTarget] = useState<Resume | null>(null)
+  const [renameTarget, setRenameTarget] = useState<Resume | null>(null)
+  const [sharingId, setSharingId] = useState<string | null>(null)
 
   const { data: resumes, isLoading, isError } = useQuery({
     queryKey: queryKeys.resumes(),
@@ -86,9 +179,7 @@ export default function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
       router.push(`/resumes/${resume.id}`)
     },
-    onError: () => {
-      addToast('Failed to create resume. Please try again.', 'error')
-    },
+    onError: () => addToast('Failed to create resume. Please try again.', 'error'),
   })
 
   const deleteMutation = useMutation({
@@ -98,16 +189,30 @@ export default function DashboardPage() {
       addToast('Resume deleted.', 'success')
       setDeleteTarget(null)
     },
-    onError: () => {
-      addToast('Failed to delete resume. Please try again.', 'error')
-      setDeleteTarget(null)
-    },
+    onError: () => { addToast('Failed to delete resume.', 'error'); setDeleteTarget(null) },
   })
 
-  function handleDeleteClick(e: React.MouseEvent, resume: Resume) {
-    e.preventDefault()
-    e.stopPropagation()
-    setDeleteTarget(resume)
+  const renameMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameResume(id, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
+      addToast('Resume renamed.', 'success')
+      setRenameTarget(null)
+    },
+    onError: () => { addToast('Failed to rename resume.', 'error') },
+  })
+
+  async function handleShare(resume: Resume) {
+    setSharingId(resume.id)
+    try {
+      const url = await shareResume(resume.id)
+      await navigator.clipboard.writeText(url).catch(() => {})
+      addToast('Share link copied to clipboard.', 'success')
+    } catch {
+      addToast('Failed to create share link.', 'error')
+    } finally {
+      setSharingId(null)
+    }
   }
 
   const count = resumes?.length ?? 0
@@ -176,7 +281,7 @@ export default function DashboardPage() {
       {!isLoading && !isError && resumes && count > 0 && (
         <div className={styles.cardGrid}>
           {resumes.map((resume) => {
-            const name = resume.fullName || 'Untitled resume'
+            const name = resume.title || resume.fullName || 'Untitled resume'
             return (
               <Link
                 key={resume.id}
@@ -195,57 +300,52 @@ export default function DashboardPage() {
                     ) : (
                       <span className={styles.statusBadge}>No template</span>
                     )}
-                    <button
-                      type="button"
-                      className={styles.cardDeleteButton}
-                      onClick={(e) => handleDeleteClick(e, resume)}
-                      disabled={deleteMutation.isPending}
-                      aria-label={`Delete ${name}`}
-                      title="Delete resume"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        <line x1="10" y1="11" x2="10" y2="17" />
-                        <line x1="14" y1="11" x2="14" y2="17" />
-                      </svg>
-                    </button>
+                    <CardMenu
+                      resumeName={name}
+                      isSharing={sharingId === resume.id}
+                      onShare={() => handleShare(resume)}
+                      onRename={() => { setRenameTarget(resume) }}
+                      onDelete={() => { setDeleteTarget(resume) }}
+                    />
                   </div>
                 </div>
 
                 <div className={styles.dashboardCardBody}>
                   <p className={styles.resumeCardName}>{name}</p>
                   <p className={styles.resumeCardEmail}>
-                    {resume.email || 'No email yet'}
+                    {resume.fullName && resume.title ? resume.fullName : resume.email || 'No email yet'}
                   </p>
                 </div>
 
                 <div className={styles.dashboardCardMeta}>
-                  <span className={styles.metaChip}>
-                    {resume.experience.length} exp
-                  </span>
-                  <span className={styles.metaChip}>
-                    {resume.education.length} edu
-                  </span>
-                  <span className={styles.metaChip}>
-                    {resume.skills.length} skills
-                  </span>
+                  <span className={styles.metaChip}>{resume.experience.length} exp</span>
+                  <span className={styles.metaChip}>{resume.education.length} edu</span>
+                  <span className={styles.metaChip}>{resume.skills.length} skills</span>
                 </div>
               </Link>
             )
           })}
         </div>
       )}
-      
+
       {deleteTarget && (
         <ConfirmModal
           title="Delete resume?"
-          body={`"${deleteTarget.fullName || 'Untitled resume'}" will be permanently deleted. This cannot be undone.`}
+          body={`"${deleteTarget.title || deleteTarget.fullName || 'Untitled resume'}" will be permanently deleted. This cannot be undone.`}
           confirmLabel="Delete"
           variant="danger"
           isPending={deleteMutation.isPending}
           onConfirm={() => deleteMutation.mutate(deleteTarget.id)}
           onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {renameTarget && (
+        <RenameModal
+          current={renameTarget.title || renameTarget.fullName || ''}
+          isPending={renameMutation.isPending}
+          onConfirm={(title) => renameMutation.mutate({ id: renameTarget.id, name: title })}
+          onCancel={() => setRenameTarget(null)}
         />
       )}
     </>

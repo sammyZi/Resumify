@@ -12,7 +12,7 @@
 
 import type { NextRequest } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { getResume, saveResumeData, deleteResume } from '@/lib/stores/resume-store'
+import { getResume, saveResumeData, deleteResume, renameResume } from '@/lib/stores/resume-store'
 import type { ResumeDataInput } from '@/lib/types'
 
 // ─── GET /api/resumes/:id ─────────────────────────────────────────────────────
@@ -122,4 +122,31 @@ export async function DELETE(
   }
 
   return Response.json({ success: true })
+}
+
+// ─── PATCH /api/resumes/:id ───────────────────────────────────────────────────
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id } = await params
+  const body = await request.json().catch(() => ({}))
+  const title = typeof body?.title === 'string' ? body.title : null
+
+  if (!title || !title.trim()) {
+    return Response.json({ success: false, message: 'Title is required' }, { status: 400 })
+  }
+
+  const result = await renameResume(id, title)
+  if (!result.ok) {
+    const status = result.error.kind === 'not_found' ? 404 : 500
+    return Response.json({ success: false, message: result.error.kind }, { status })
+  }
+
+  return Response.json({ success: true, resume: result.value })
 }

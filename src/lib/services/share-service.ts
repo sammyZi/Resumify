@@ -95,6 +95,7 @@ function rowToResume(row: ResumeRow): Resume {
     achievements: ((row as { achievements?: unknown }).achievements as Resume['achievements']) ?? [],
     latexSource: row.latex_source,
     pdfPath: row.pdf_path,
+    title: (row as { title?: string }).title ?? '',
   }
 }
 
@@ -317,6 +318,7 @@ export async function copyTemplateFromShare(
     .insert({
       user_id: intoUserId,
       template_id: templateId ?? null,
+      title: '',
       // Structural fields from share — never Resume_Data.
       latex_source: latexScaffold ?? null,
       // Resume_Data fields are explicitly empty.

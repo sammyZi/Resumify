@@ -112,46 +112,49 @@ export default function ResumePreviewPage({
 
   return (
     <>
-      <Link href={`/resumes/${id}`} className={workspace.backLink}>
-        ← Back to editor
-      </Link>
+      <div className={styles.noPrint}>
+        <Link href={`/resumes/${id}`} className={workspace.backLink}>
+          ← Back to editor
+        </Link>
 
-      <div className={styles.toolbar}>
-        <label className={workspace.label} htmlFor="template-select">
-          Template
-        </label>
-        <select
-          id="template-select"
-          className={workspace.input}
-          style={{ width: 'auto' }}
-          value={activeTemplateId}
-          onChange={(e) => handleSelect(e.target.value)}
+        <div className={styles.toolbar}>
+          <label className={workspace.label} htmlFor="template-select">
+            Template
+          </label>
+          <select
+            id="template-select"
+            className={workspace.input}
+            style={{ width: 'auto' }}
+            value={activeTemplateId}
+            onChange={(e) => handleSelect(e.target.value)}
+          >
+            {TEMPLATES.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} — {t.roleCategory}
+              </option>
+            ))}
+          </select>
+
+          <span className={styles.spacer} />
+
+          <button
+            type="button"
+            className={workspace.button}
+            onClick={() => {
+              window.open(`/api/resumes/${id}/pdf`, '_blank', 'noopener,noreferrer')
+            }}
+          >
+            Download PDF
+          </button>
+        </div>
+
+        <p
+          className={`${workspace.notice} ${workspace.noticeInfo}`}
+          style={{ marginBottom: '1rem' }}
         >
-          {TEMPLATES.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name} — {t.roleCategory}
-            </option>
-          ))}
-        </select>
-
-        <span className={styles.spacer} />
-
-        <button
-          type="button"
-          className={workspace.button}
-          onClick={() => window.print()}
-        >
-          Download PDF
-        </button>
+          Tip: the PDF will download with clickable links and clean formatting.
+        </p>
       </div>
-
-      <p
-        className={`${workspace.notice} ${workspace.noticeInfo}`}
-        style={{ marginBottom: '1rem' }}
-      >
-        Tip: in the print dialog choose <strong>Save as PDF</strong> as the
-        destination. Margins are already set for US Letter.
-      </p>
 
       <div className={styles.stage}>
         <div className={styles.paper}>

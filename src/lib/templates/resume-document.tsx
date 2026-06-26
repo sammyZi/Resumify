@@ -68,14 +68,14 @@ function ContactRow({ data }: { data: ResumeData }) {
   return (
     <div className={styles.contact}>
       {data.email ? (
-        <span className={styles.contactItem}>
+        <a href={`mailto:${data.email}`} className={styles.contactItem}>
           <MailIcon /> {data.email}
-        </span>
+        </a>
       ) : null}
       {data.phone ? (
-        <span className={styles.contactItem}>
+        <a href={`tel:${data.phone}`} className={styles.contactItem}>
           <PhoneIcon /> {data.phone}
-        </span>
+        </a>
       ) : null}
       {data.location ? (
         <span className={styles.contactItem}>
@@ -92,9 +92,15 @@ function LinksRow({ links }: { links: ResumeLink[] }) {
     <div className={styles.links}>
       {links.map((link, i) =>
         link.url ? (
-          <span key={i} className={styles.linkItem}>
+          <a
+            key={i}
+            href={link.url}
+            className={styles.linkItem}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <LinkIcon type={link.type} /> {linkText(link)}
-          </span>
+          </a>
         ) : null
       )}
     </div>
@@ -118,14 +124,24 @@ function ProjectItem({ project }: { project: ProjectEntry }) {
         <span className={styles.entryTitle}>{project.name || 'Project'}</span>
         <span className={styles.projectLinks}>
           {project.liveUrl ? (
-            <span className={styles.linkItem}>
+            <a
+              href={project.liveUrl}
+              className={styles.linkItem}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <LinkIcon type="website" /> Live
-            </span>
+            </a>
           ) : null}
           {project.repoUrl ? (
-            <span className={styles.linkItem}>
+            <a
+              href={project.repoUrl}
+              className={styles.linkItem}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <LinkIcon type="github" /> Code
-            </span>
+            </a>
           ) : null}
         </span>
       </div>
@@ -262,13 +278,13 @@ export function ResumeDocument({
 
           <h2 className={styles.sidebarTitle}>Contact</h2>
           <div className={styles.sidebarContactList}>
-            <span className={styles.contactItem}>
+            <a href={`mailto:${data.email || ''}`} className={styles.contactItem}>
               <MailIcon /> {data.email || 'you@example.com'}
-            </span>
+            </a>
             {data.phone ? (
-              <span className={styles.contactItem}>
+              <a href={`tel:${data.phone}`} className={styles.contactItem}>
                 <PhoneIcon /> {data.phone}
-              </span>
+              </a>
             ) : null}
             {data.location ? (
               <span className={styles.contactItem}>
@@ -277,9 +293,15 @@ export function ResumeDocument({
             ) : null}
             {data.links.map((link, i) =>
               link.url ? (
-                <span key={i} className={styles.contactItem}>
+                <a
+                  key={i}
+                  href={link.url}
+                  className={styles.contactItem}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <LinkIcon type={link.type} /> {linkText(link)}
-                </span>
+                </a>
               ) : null
             )}
           </div>
