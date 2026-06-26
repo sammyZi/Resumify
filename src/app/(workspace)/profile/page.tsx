@@ -13,6 +13,7 @@
  * - Field-level validation error display (from API errors map)  (Req 11.8)
  * - Save-confirmation notice on success                         (Req 11.9)
  * - Save-failure + retry on 500                                 (Req 11.9)
+ * - Import from PDF resume upload                               (Custom)
  *
  * Requirements: 11.1, 11.8, 11.9
  */
@@ -23,6 +24,7 @@ import { queryKeys } from '@/components/query-provider'
 import { useUIStore } from '@/lib/stores/ui-store'
 import type { UserProfile, ResumeData } from '@/lib/types'
 import { ResumeForm } from '../_components/resume-form'
+import { PdfImportButton } from '../_components/pdf-import-button'
 import styles from '../_components/workspace-ui.module.css'
 
 // ── API helpers ───────────────────────────────────────────────────────────────
@@ -83,6 +85,18 @@ export default function ProfilePage() {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [saveErrorMsg, setSaveErrorMsg] = useState<string>('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]> | null>(null)
+
+  // PDF import — re-key the form to pick up imported data
+  const [importedData, setImportedData] = useState<ResumeData | null>(null)
+  const [importKey, setImportKey] = useState(0)
+
+  function handlePdfImport(data: ResumeData) {
+    setImportedData(data)
+    setImportKey((k) => k + 1)
+    setSaveState('idle')
+    setFieldErrors(null)
+    addToast('Resume imported from PDF — review the fields and save.', 'success')
+  }
   const [pendingData, setPendingData] = useState<ResumeData | null>(null)
 
   const {
@@ -224,6 +238,10 @@ export default function ProfilePage() {
             Your master details. New resumes are pre-filled from here.
           </p>
         </div>
+        <PdfImportButton
+          onImport={handlePdfImport}
+          disabled={saveMutation.isPending}
+        />
       </div>
 
       {!profile && (
@@ -234,8 +252,8 @@ export default function ProfilePage() {
       )}
 
       <ResumeForm
-        key={profile?.id ?? 'new'}
-        initialData={initialData}
+        key={`${profile?.id ?? 'new'}-${importKey}`}
+        initialData={importedData ?? initialData}
         isSaving={saveMutation.isPending}
         fieldErrors={fieldErrors}
         onSave={handleSave}

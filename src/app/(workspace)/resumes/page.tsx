@@ -8,6 +8,8 @@
  *   Rename  — inline modal to update the resume's name (fullName)
  *   Delete  — confirmation modal
  *
+ * Also supports importing a resume from a PDF upload.
+ *
  * Requirements: 5.2, 5.3, 11.4, 11.5
  */
 
@@ -17,10 +19,11 @@ import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
 import { useUIStore } from '@/lib/stores/ui-store'
-import type { Resume } from '@/lib/types'
+import type { Resume, ResumeData } from '@/lib/types'
 import { getTemplateMeta } from '@/lib/templates/registry'
 import { ConfirmModal } from '../_components/confirm-modal'
 import { CardMenu } from '../_components/card-menu'
+import { PdfImportButton } from '../_components/pdf-import-button'
 import styles from '../_components/workspace-ui.module.css'
 
 // ── API helpers ───────────────────────────────────────────────────────────────
@@ -32,7 +35,7 @@ async function fetchResumes(): Promise<Resume[]> {
   return (await res.json()).resumes as Resume[]
 }
 
-async function createResume(): Promise<Resume> {
+async function createResumeApi(): Promise<Resume> {
   const res = await fetch('/api/resumes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -41,6 +44,16 @@ async function createResume(): Promise<Resume> {
   if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
   if (!res.ok) throw new Error('Failed to create resume')
   return (await res.json()).resume as Resume
+}
+
+async function saveResumeDataApi(id: string, data: ResumeData): Promise<void> {
+  const res = await fetch(`/api/resumes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
+  if (!res.ok) throw new Error('Failed to save resume data')
 }
 
 async function deleteResume(id: string): Promise<void> {
@@ -167,6 +180,7 @@ export default function DashboardPage() {
   const [deleteTarget, setDeleteTarget] = useState<Resume | null>(null)
   const [renameTarget, setRenameTarget] = useState<Resume | null>(null)
   const [sharingId, setSharingId] = useState<string | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
 
   const { data: resumes, isLoading, isError } = useQuery({
     queryKey: queryKeys.resumes(),
@@ -174,13 +188,29 @@ export default function DashboardPage() {
   })
 
   const createMutation = useMutation({
-    mutationFn: createResume,
+    mutationFn: createResumeApi,
     onSuccess: (resume) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
       router.push(`/resumes/${resume.id}`)
     },
     onError: () => addToast('Failed to create resume. Please try again.', 'error'),
   })
+
+  // PDF import: create resume → save parsed data → navigate to editor
+  async function handlePdfImport(data: ResumeData) {
+    setIsImporting(true)
+    try {
+      const resume = await createResumeApi()
+      await saveResumeDataApi(resume.id, data)
+      queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
+      addToast('Resume imported from PDF!', 'success')
+      router.push(`/resumes/${resume.id}`)
+    } catch {
+      addToast('Failed to create resume from PDF. Please try again.', 'error')
+    } finally {
+      setIsImporting(false)
+    }
+  }
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteResume(id),
@@ -230,14 +260,21 @@ export default function DashboardPage() {
                 : `You have ${count} resume${count === 1 ? '' : 's'}.`}
           </p>
         </div>
-        <button
-          type="button"
-          className={styles.button}
-          onClick={() => createMutation.mutate()}
-          disabled={createMutation.isPending}
-        >
-          {createMutation.isPending ? 'Creating…' : '+ New resume'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <button
+            type="button"
+            className={styles.button}
+            onClick={() => createMutation.mutate()}
+            disabled={createMutation.isPending || isImporting}
+          >
+            {createMutation.isPending ? 'Creating…' : '+ New resume'}
+          </button>
+          <PdfImportButton
+            onImport={handlePdfImport}
+            disabled={createMutation.isPending || isImporting}
+            label="Import from PDF"
+          />
+        </div>
       </div>
 
       {isLoading && (

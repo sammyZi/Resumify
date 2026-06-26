@@ -8,6 +8,7 @@
  * - Field-level validation, save/retry, save-to-profile
  * - Preview & Download + Change template actions
  * - Sharing panel (create recruiter/template links, revoke)
+ * - Import from PDF resume upload
  *
  * Requirements: 5.1–5.7, 8.1–8.7, 11.6, 11.7, 12.1–12.11
  */
@@ -19,6 +20,7 @@ import { queryKeys } from '@/components/query-provider'
 import { useUIStore } from '@/lib/stores/ui-store'
 import type { Resume, ResumeData, Share } from '@/lib/types'
 import { ResumeForm } from '../../_components/resume-form'
+import { PdfImportButton } from '../../_components/pdf-import-button'
 import type { RefinementSuggestion } from '../../_components/refine-panel'
 import styles from '../../_components/workspace-ui.module.css'
 
@@ -208,6 +210,14 @@ export default function ResumeEditorPage({
     setDraftKey((k) => k + 1)
   }
 
+  function handlePdfImport(importedData: ResumeData) {
+    setDraftData(importedData)
+    setDraftKey((k) => k + 1)
+    setSaveState('idle')
+    setFieldErrors(null)
+    addToast('Resume imported from PDF — review the fields and save.', 'success')
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (isLoading) return <p className={styles.loading}>Loading resume…</p>
@@ -265,9 +275,15 @@ export default function ResumeEditorPage({
         <h1 className={styles.pageTitle}>
           {resume.fullName ? `${resume.fullName}'s resume` : 'Edit resume'}
         </h1>
-        <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}>
-          Change template
-        </Link>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <PdfImportButton
+            onImport={handlePdfImport}
+            disabled={saveMutation.isPending}
+          />
+          <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}>
+            Change template
+          </Link>
+        </div>
       </div>
 
       {/* ── Form ─────────────────────────────────────────────────────────── */}
