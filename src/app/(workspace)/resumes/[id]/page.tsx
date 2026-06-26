@@ -18,9 +18,10 @@ import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
 import { useUIStore } from '@/lib/stores/ui-store'
-import type { Resume, ResumeData, Share } from '@/lib/types'
+import type { Resume, ResumeData } from '@/lib/types'
 import { ResumeForm } from '../../_components/resume-form'
 import { PdfImportButton } from '../../_components/pdf-import-button'
+import { ShareModal } from '../../_components/share-modal'
 import type { RefinementSuggestion } from '../../_components/refine-panel'
 import styles from '../../_components/workspace-ui.module.css'
 
@@ -55,36 +56,6 @@ async function saveToProfile(id: string): Promise<{ success: boolean; message?: 
   return res.json()
 }
 
-// ── Share API ─────────────────────────────────────────────────────────────────
-
-type ShareKind = 'recruiter' | 'template'
-
-async function createShare(resumeId: string, kind: ShareKind) {
-  const res = await fetch('/api/shares', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ resumeId, kind }),
-  })
-  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
-  const data = await res.json()
-  if (res.ok) return { success: true as const, share: data.share }
-  return { success: false as const, message: data.error ?? 'Failed to create share link.' }
-}
-
-async function revokeShare(shareId: string) {
-  const res = await fetch(`/api/shares/${shareId}/revoke`, { method: 'POST' })
-  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
-  const data = await res.json()
-  if (res.ok) return { success: true as const }
-  return { success: false as const, message: data.error ?? 'Failed to revoke share.' }
-}
-
-function buildShareUrl(token: string, kind: ShareKind): string {
-  return kind === 'recruiter'
-    ? `${window.location.origin}/s/${token}`
-    : `${window.location.origin}/t/${token}`
-}
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ResumeEditorPage({
@@ -107,9 +78,7 @@ export default function ResumeEditorPage({
   const [draftData, setDraftData] = useState<ResumeData | null>(null)
   const [draftKey, setDraftKey] = useState(0)
 
-  type ShareEntry = Share & { url: string }
-  const [shares, setShares] = useState<ShareEntry[]>([])
-  const [shareCreateError, setShareCreateError] = useState<string | null>(null)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const { data: resume, isLoading, isError, error } = useQuery({
     queryKey: queryKeys.resume(id),
@@ -150,36 +119,6 @@ export default function ResumeEditorPage({
       }
     },
     onError: () => setS2pState('error'),
-  })
-
-  const createShareMutation = useMutation({
-    mutationFn: (kind: ShareKind) => createShare(id, kind),
-    onSuccess: (result) => {
-      if (result.success) {
-        setShareCreateError(null)
-        const url = buildShareUrl(result.share.token, result.share.kind as ShareKind)
-        setShares((prev) => [
-          ...prev,
-          { id: result.share.id, token: result.share.token, kind: result.share.kind as ShareKind, resumeId: result.share.resumeId, ownerId: '', revoked: false, url },
-        ])
-      } else {
-        setShareCreateError(result.message)
-      }
-    },
-    onError: () => setShareCreateError('Failed to create share link. Please try again.'),
-  })
-
-  const revokeShareMutation = useMutation({
-    mutationFn: (shareId: string) => revokeShare(shareId),
-    onSuccess: (result, shareId) => {
-      if (result.success) {
-        setShares((prev) => prev.filter((s) => s.id !== shareId))
-        addToast('Share revoked.', 'success')
-      } else {
-        addToast(result.message, 'error')
-      }
-    },
-    onError: () => addToast('Failed to revoke share. Please try again.', 'error'),
   })
 
   function handleSave(data: ResumeData) {
@@ -280,6 +219,10 @@ export default function ResumeEditorPage({
             onImport={handlePdfImport}
             disabled={saveMutation.isPending}
           />
+          <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+            onClick={() => setShareOpen(true)}>
+            Share
+          </button>
           <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}>
             Change template
           </Link>
@@ -324,65 +267,24 @@ export default function ResumeEditorPage({
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Sharing</h2>
         </div>
-        <div className={styles.shareCreateButtons}>
-          <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
-            onClick={() => createShareMutation.mutate('recruiter')} disabled={createShareMutation.isPending}>
-            {createShareMutation.isPending ? 'Creating…' : 'Share with recruiter'}
-          </button>
-          <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
-            onClick={() => createShareMutation.mutate('template')} disabled={createShareMutation.isPending}>
-            {createShareMutation.isPending ? 'Creating…' : 'Share template'}
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem' }}>
+          Create recruiter or template links and manage existing ones.
+        </p>
+        <div style={{ marginTop: '0.5rem' }}>
+          <button type="button" className={`${styles.button} ${styles.buttonSecondary}`}
+            onClick={() => setShareOpen(true)}>
+            Manage share links
           </button>
         </div>
-        {shareCreateError && (
-          <div className={`${styles.notice} ${styles.noticeError}`} role="alert">{shareCreateError}</div>
-        )}
-        {shares.length > 0 && (
-          <div className={styles.shareList}>
-            {shares.map((share) => (
-              <ShareItem key={share.id} share={share}
-                onRevoke={() => revokeShareMutation.mutate(share.id)}
-                isRevoking={revokeShareMutation.isPending && revokeShareMutation.variables === share.id}
-              />
-            ))}
-          </div>
-        )}
       </div>
+
+      {shareOpen && (
+        <ShareModal
+          resumeId={id}
+          resumeName={resume.title || resume.fullName || 'Untitled resume'}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
     </>
-  )
-}
-
-// ── ShareItem ─────────────────────────────────────────────────────────────────
-
-function ShareItem({ share, onRevoke, isRevoking }: {
-  share: { id: string; kind: 'recruiter' | 'template'; url: string }
-  onRevoke: () => void
-  isRevoking: boolean
-}) {
-  const [copied, setCopied] = useState(false)
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(share.url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch { /* silently fail */ }
-  }
-
-  return (
-    <div className={styles.shareItem}>
-      <span className={`${styles.shareKindBadge} ${share.kind === 'recruiter' ? styles.shareKindRecruiter : styles.shareKindTemplate}`}>
-        {share.kind === 'recruiter' ? 'Recruiter' : 'Template'}
-      </span>
-      <span className={styles.shareUrl} title={share.url}>{share.url}</span>
-      <div className={styles.shareActions}>
-        <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`} onClick={handleCopy} aria-label="Copy share link">
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
-        <button type="button" className={`${styles.button} ${styles.buttonDanger}`} onClick={onRevoke} disabled={isRevoking} aria-label="Revoke share link">
-          {isRevoking ? 'Revoking…' : 'Revoke'}
-        </button>
-      </div>
-    </div>
   )
 }

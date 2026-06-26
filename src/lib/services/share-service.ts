@@ -274,10 +274,11 @@ export async function resolveShare(
 // ─── revokeShare ─────────────────────────────────────────────────────────────
 
 /**
- * Sets revoked=true on the share row where id=shareId AND owner_id=userId.
+ * Hard-deletes the share row where id=shareId AND owner_id=userId.
  *
- * Uses the session-bound client so RLS further constrains the update to the
- * authenticated user's own rows.
+ * Revoking a link permanently removes it from the database so it can no longer
+ * be resolved. Uses the session-bound client so RLS further constrains the
+ * delete to the authenticated user's own rows.
  *
  * Requirements: 8.7
  */
@@ -289,7 +290,7 @@ export async function revokeShare(
 
   const { data, error } = await supabase
     .from('shares')
-    .update({ revoked: true })
+    .delete()
     .eq('id', shareId)
     .eq('owner_id', userId)
     .select('id')

@@ -32,16 +32,23 @@ export function ShareModal({
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState<ShareKind | null>(null)
   const [revoking, setRevoking] = useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
-      const res = await fetch(`/api/shares?resumeId=${resumeId}`)
+      const res = await fetch(`/api/shares?resumeId=${resumeId}`, { cache: 'no-store' })
       if (res.status === 401) { window.location.href = '/login'; return }
-      const data = await res.json()
-      setShares(res.ok ? (data.shares as Share[]) : [])
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.error ?? 'Failed to load share links.')
+        setShares([])
+      } else {
+        setShares((data.shares as Share[]) ?? [])
+      }
     } catch {
       setError('Failed to load share links.')
     } finally {
@@ -82,6 +89,7 @@ export function ShareModal({
 
   async function revoke(id: string) {
     setRevoking(id)
+    setConfirmingId(null)
     try {
       const res = await fetch(`/api/shares/${id}/revoke`, { method: 'POST' })
       if (!res.ok) throw new Error()
@@ -142,14 +150,35 @@ export function ShareModal({
                     <button type="button" className={styles.copyBtn} onClick={() => copy(share)}>
                       {copiedId === share.id ? 'Copied!' : 'Copy'}
                     </button>
-                    <button
-                      type="button"
-                      className={styles.revokeBtn}
-                      onClick={() => revoke(share.id)}
-                      disabled={revoking === share.id}
-                    >
-                      {revoking === share.id ? '…' : 'Revoke'}
-                    </button>
+                    {confirmingId === share.id ? (
+                      <>
+                        <button
+                          type="button"
+                          className={styles.revokeBtn}
+                          onClick={() => revoke(share.id)}
+                          disabled={revoking === share.id}
+                        >
+                          {revoking === share.id ? '…' : 'Confirm'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.copyBtn}
+                          onClick={() => setConfirmingId(null)}
+                          disabled={revoking === share.id}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.revokeBtn}
+                        onClick={() => setConfirmingId(share.id)}
+                        disabled={revoking === share.id}
+                      >
+                        Revoke
+                      </button>
+                    )}
                   </div>
                 </div>
               )
