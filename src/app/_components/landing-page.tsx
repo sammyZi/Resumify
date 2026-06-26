@@ -40,6 +40,15 @@ function IconLink() {
 
 const ROLES = ['AI', 'TECH', 'STARTUPS', 'ENGINEERING']
 
+/** Smoothly scroll to an in-page section by id. */
+function scrollToSection(e: React.MouseEvent, id: string) {
+  const el = document.getElementById(id)
+  if (el) {
+    e.preventDefault()
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
 export function LandingPage() {
   const [activeTab, setActiveTab] = useState(0)
 
@@ -214,10 +223,10 @@ const share = await createShareToken({
           </Link>
 
           <div className={styles.navMiddlePill}>
-            <Link href="#features" className={styles.navLink}>FEATURES</Link>
-            <Link href="#workflow" className={styles.navLink}>HOW IT WORKS</Link>
+            <a href="#features" className={styles.navLink} onClick={(e) => scrollToSection(e, 'features')}>FEATURES</a>
+            <a href="#workflow" className={styles.navLink} onClick={(e) => scrollToSection(e, 'workflow')}>HOW IT WORKS</a>
             <a href="https://github.com/sammyZi/Resumify" target="_blank" rel="noopener noreferrer" className={styles.navLink}>OPEN SOURCE</a>
-            <Link href="#contact" className={styles.navLink}>CONTACT</Link>
+            <a href="#contact" className={styles.navLink} onClick={(e) => scrollToSection(e, 'contact')}>CONTACT</a>
           </div>
 
           <div className={styles.navRight}>
@@ -462,8 +471,8 @@ const share = await createShareToken({
             <h4 className={styles.footerColTitle}>Product</h4>
             <ul className={styles.footerList}>
               <li><Link href="/login">Get started</Link></li>
-              <li><a href="#features">Features</a></li>
-              <li><a href="#workflow">How it works</a></li>
+              <li><a href="#features" onClick={(e) => scrollToSection(e, 'features')}>Features</a></li>
+              <li><a href="#workflow" onClick={(e) => scrollToSection(e, 'workflow')}>How it works</a></li>
             </ul>
           </div>
 

@@ -371,6 +371,7 @@
 
 /* ─── FEATURES SECTION ───────────────────────────────────────────────────── */
 .featuresSection {
+  scroll-margin-top: 90px;
   background: #f5f2ed;
   padding: 0;
   border-top: 2px solid #34302a;
@@ -604,6 +605,7 @@
 
 /* ─── STEPS SECTION ─────────────────────────────────────────────────────── */
 .stepsSection {
+  scroll-margin-top: 90px;
   background: #f5f2ed;
   border-top: 2px solid #34302a;
 }
@@ -773,6 +775,7 @@
 /* ─── Footer (green) ─────────────────────────────────────────────────────── */
 
 .footer {
+  scroll-margin-top: 90px;
   background: linear-gradient(160deg, #064e3b 0%, #065f46 50%, #047857 100%);
   color: #d6e6dd;
   padding: 4rem 2rem 2rem;
