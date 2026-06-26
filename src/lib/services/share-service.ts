@@ -152,13 +152,14 @@ export async function listSharesByResume(
 ): Promise<Result<Share[], ShareError>> {
   const supabase = await createSupabaseServerClient()
 
+  // No `.order()` — avoids any dependency on an optional column and keeps the
+  // query resilient. The list is small; the client can sort if needed.
   const { data, error } = await supabase
     .from('shares')
-    .select('*')
+    .select('id, resume_id, owner_id, token, kind, revoked')
     .eq('owner_id', userId)
     .eq('resume_id', resumeId)
     .eq('revoked', false)
-    .order('created_at', { ascending: false })
 
   if (error) {
     return err({ kind: 'not_found', message: error.message })
