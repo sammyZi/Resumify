@@ -1094,3 +1094,101 @@
   gap: 0.75rem;
   flex-wrap: wrap;
 }
+
+/* ─── Responsive — tablet & mobile ───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 1rem;
+    gap: 0.75rem;
+  }
+
+  .navBrand {
+    font-size: 1rem;
+    margin-right: 0.25rem;
+  }
+
+  .navLinks {
+    gap: 0.125rem;
+  }
+
+  .navLink {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .main {
+    padding: 1.25rem 1rem 2.5rem;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .galleryGrid {
+    padding-inline: 1rem;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 560px) {
+  /* Brand label hides, mark stays — frees room for nav links */
+  .navBrandText {
+    display: none;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageHeader > div {
+    width: 100%;
+  }
+
+  /* Header action buttons stretch to fill the row */
+  .pageHeader .button,
+  .pageHeader .buttonSecondary {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Resume cards: stack content above the action menu */
+  .resumeCard {
+    padding: 0.875rem 1rem;
+  }
+
+  .formActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .formActions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .shareItem,
+  .shareUrl {
+    width: 100%;
+  }
+
+  .shareActions {
+    width: 100%;
+  }
+
+  .shareActions .button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .galleryGrid {
+    padding-inline: 0.5rem;
+  }
+}

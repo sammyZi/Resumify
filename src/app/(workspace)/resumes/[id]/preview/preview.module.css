@@ -35,6 +35,25 @@
   /* visible on screen, hidden when printing */
 }
 
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .stage {
+    padding: 0.75rem;
+  }
+  /* The resume document is a fixed 816px (US Letter at 96dpi). Scale it down
+     so the whole width is visible without horizontal scrolling on phones. */
+  .paper {
+    zoom: 0.42;
+  }
+}
+
+@media (max-width: 480px) {
+  .paper {
+    zoom: 0.36;
+  }
+}
+
 @media print {
   .noPrint {
     display: none !important;

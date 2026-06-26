@@ -124,7 +124,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
           <span className={styles.navBrandMark}>
             <BrandLogo size={20} />
           </span>
-          Resumify
+          <span className={styles.navBrandText}>Resumify</span>
         </Link>
 
         <div className={styles.navLinks}>
