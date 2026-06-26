@@ -15,16 +15,18 @@
   position: relative;
   overflow: hidden;
   color: #ffffff;
-  background-color: #0d1117;
-  background-image:
-    linear-gradient(
-      to bottom,
-      rgba(13, 17, 23, 0.55) 0%,
-      rgba(13, 17, 23, 0.75) 100%
-    ),
-    url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=1200&q=80');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(160deg, #16150f 0%, #1d1b14 60%, #201d15 100%);
+}
+
+/* Soft mint glow accents over the charcoal */
+.brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 50% at 20% 20%, rgba(0, 242, 122, 0.16) 0%, transparent 60%),
+    radial-gradient(50% 50% at 85% 80%, rgba(4, 120, 87, 0.22) 0%, transparent 62%);
+  pointer-events: none;
 }
 
 .brandInner {
@@ -42,19 +44,13 @@
   font-size: 2.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #fdf6e3;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.9),
-    0 4px 24px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
 }
 
 .brandTagline {
   font-size: 1.125rem;
   line-height: 1.6;
-  color: #e8d5b0;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.9),
-    0 4px 24px rgba(0, 0, 0, 0.7);
+  color: #c7c0b1;
 }
 
 /* ─── Form area (right) ─────────────────────────────────────────────────── */

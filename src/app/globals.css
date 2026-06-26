@@ -17,38 +17,41 @@ body {
 ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='light'] {
-  --color-background:    #fdfbf7;
-  --color-surface:       #f4eee3;
-  --color-text-primary:  #2b2420;
-  --color-text-secondary:#6b5f54;
-  --color-border:        #e4dccd;
-  --color-primary:       #c2410c;
+  --color-background:    #f2efe9;
+  --color-surface:       #ffffff;
+  --color-text-primary:  #14120d;
+  --color-text-secondary:#5c5446;
+  --color-border:        #e3ddcf;
+  --color-primary:       #00F27A;
   --color-primary-text:  #ffffff;
+  /* Vivid brand mint — used for accent fills / highlights. */
+  --color-accent:        #00F27A;
 
   /* Legacy aliases kept for backwards compatibility */
-  --background: #fdfbf7;
-  --foreground: #2b2420;
+  --background: #f2efe9;
+  --foreground: #14120d;
 }
 
 /* ─── Dark theme palette ─────────────────────────────────────────────────────
-   Warm charcoal surfaces with an amber accent. Contrast pairs ≥ 4.5:1:
-     --color-text-primary   #f5efe8 on --color-background #1a1613  → ~15:1
-     --color-text-secondary #b5a99b on --color-background #1a1613  → ~7:1
-     --color-primary-text   #1a1613 on --color-primary    #f59e0b  → ~9:1
+   Deep green-charcoal surfaces with the vivid mint accent. Contrast ≥ 4.5:1:
+     --color-text-primary   #eaf3ee on --color-background #0c1410  → ~15:1
+     --color-text-secondary #9db1a6 on --color-background #0c1410  → ~7:1
+     --color-primary-text   #07150d on --color-primary    #00F27A  → ~11:1
 ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='dark'] {
-  --color-background:    #1a1613;
-  --color-surface:       #241f1a;
-  --color-text-primary:  #f5efe8;
-  --color-text-secondary:#b5a99b;
-  --color-border:        #3a322b;
-  --color-primary:       #f59e0b;
-  --color-primary-text:  #1a1613;
+  --color-background:    #0c1410;
+  --color-surface:       #15211b;
+  --color-text-primary:  #eaf3ee;
+  --color-text-secondary:#9db1a6;
+  --color-border:        #283630;
+  --color-primary:       #00F27A;
+  --color-primary-text:  #07150d;
+  --color-accent:        #00F27A;
 
   /* Legacy aliases */
-  --background: #1a1613;
-  --foreground: #f5efe8;
+  --background: #0c1410;
+  --foreground: #eaf3ee;
 }
 
 /* ─── Base reset and layout ──────────────────────────────────────────────── */

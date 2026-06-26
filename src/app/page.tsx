@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { LandingPage } from './_components/landing-page'
 
 /**
- * Root route — resolves the user's authentication state and redirects:
- *   - Authenticated  → /dashboard (workspace, Requirement 1.2, 2.2, 2.3)
- *   - Unauthenticated → /login    (Requirement 10.1)
- *
- * There is no UI to render here; the redirect happens before any HTML
- * is sent to the browser.
+ * Root route — resolves the user's authentication state:
+ *   - Authenticated  → Redirect to /resumes (app workspace)
+ *   - Unauthenticated → Render modern tech LandingPage
  */
 export default async function RootPage() {
   const supabase = await createSupabaseServerClient()
@@ -17,7 +15,7 @@ export default async function RootPage() {
 
   if (user) {
     redirect('/resumes')
-  } else {
-    redirect('/login')
   }
+
+  return <LandingPage />
 }

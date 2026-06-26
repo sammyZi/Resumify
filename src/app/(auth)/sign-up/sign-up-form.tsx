@@ -41,6 +41,7 @@ export function SignUpForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [agreed, setAgreed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
@@ -48,6 +49,10 @@ export function SignUpForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!agreed) {
+      setFormError('Please accept the Privacy Policy to continue.')
+      return
+    }
     setSubmitting(true)
     setFieldErrors({})
     setFormError(null)
@@ -162,7 +167,23 @@ export function SignUpForm() {
           )}
         </div>
 
-        <button type="submit" className={styles.button} disabled={submitting}>
+        <label className={styles.consentRow}>
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            required
+          />
+          <span>
+            I agree to the{' '}
+            <Link className={styles.link} href="/privacy" target="_blank">
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
+
+        <button type="submit" className={styles.button} disabled={submitting || !agreed}>
           {submitting ? 'Creating account…' : 'Create account'}
         </button>
       </form>

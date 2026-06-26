@@ -1,0 +1,884 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   landing-page.module.css
+   Koyeb-inspired: spray-paint/airbrush hero bg, floating navbar, clean grid
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Reset & Container ──────────────────────────────────────────────────── */
+.container {
+  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #2a2622;
+  background: #f5f2ed;
+  overflow-x: hidden;
+}
+
+/* ─── HERO WRAPPER (navbar + hero share one spray-painted canvas) ────────── */
+.heroWrapper {
+  position: relative;
+  width: 100%;
+  min-height: 900px;
+  overflow: hidden;
+  background: #f2efe9;
+}
+
+/* Full-bleed SVG spray background pinned behind everything */
+.sprayBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  /* Promote to its own compositor layer so the expensive SVG filters are
+     rasterized once and just composited during scroll (kills scroll jank). */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: paint;
+}
+
+/* ─── KOYEB EXACT NAVBAR ─────────────────────────────────────────────────── */
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 3.5rem;
+  background: transparent;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 900;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  color: #2a2622;
+  text-decoration: none;
+}
+
+.brandName {
+  font-family: 'Impact', 'SF Pro Display', -apple-system, sans-serif;
+  font-stretch: condensed;
+  letter-spacing: 0.02em;
+}
+
+/* Koyeb rounded grey pill container for nav links */
+.navMiddlePill {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: #e5e2db;
+  border-radius: 8px;
+  padding: 0.6rem 2rem;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.navLink {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.15s;
+}
+
+.navLink:hover {
+  color: #2a2622;
+}
+
+.navRight {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.loginBtn {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2a2622;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+
+.loginBtn:hover {
+  opacity: 0.7;
+}
+
+.signupBtn {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: #2b2925;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.15s, transform 0.15s;
+  border: none;
+  box-shadow: none;
+}
+
+.signupBtn span {
+  color: #f97316;
+  font-size: 0.7rem;
+}
+
+.signupBtn:hover {
+  background: #3a382f;
+  transform: translateY(-1px);
+}
+
+/* ─── KOYEB EXACT HERO SECTION ───────────────────────────────────────────── */
+.hero {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10rem 2rem 0;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heroTitle {
+  font-family: 'Impact', 'SF Pro Display', 'Arial Black', sans-serif;
+  font-stretch: condensed;
+  font-size: clamp(2.4rem, 4.8vw, 4rem);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: #2a2622;
+  text-transform: uppercase;
+  margin: 0 0 1.75rem;
+}
+
+.typedWord {
+  color: #047857;
+}
+
+.heroRoleLine {
+  white-space: nowrap;
+}
+
+.blinkingBar {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.82em;
+  margin-left: 0.08em;
+  background: #047857;
+  vertical-align: -0.02em;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+.heroSubtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #4b5563;
+  max-width: 600px;
+  margin: 0 0 2.5rem;
+  font-weight: 400;
+}
+
+.heroActions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4.5rem;
+}
+
+.btnPrimary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #2b2925;
+  color: #fff;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.85rem 1.8rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.btnTriangle {
+  color: #f97316;
+  font-size: 0.75rem;
+}
+
+.btnPrimary:hover {
+  background: #3a382f;
+  transform: translateY(-2px);
+}
+
+.btnSecondary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  color: #2a2622;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.btnSecondary:hover {
+  opacity: 0.7;
+}
+
+/* Floating Badges on Globe */
+.floatingBadges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floatChip {
+  position: absolute;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chipIconDark {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* ─── KOYEB CENTERED TERMINAL MOCKUP ─────────────────────────────────────── */
+.heroStage {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  z-index: 3;
+  margin: 0 auto;
+}
+
+/* Terminal window peeking up */
+.terminalWindow {
+  background: #1f1e1a;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid #3a382f;
+  border-bottom: none;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  position: relative;
+  z-index: 3;
+  text-align: left;
+}
+
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #272521;
+  border-bottom: 1px solid #33302a;
+}
+
+.windowDots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dotRed {
+  background: #ff5f57;
+}
+
+.dotYellow {
+  background: #febc2e;
+}
+
+.dotGreen {
+  background: #28c840;
+}
+
+.terminalTitle {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: #666;
+  letter-spacing: 0.02em;
+}
+
+.terminalBody {
+  padding: 1.25rem 1.4rem;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: #e2e8f0;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+
+.codeComment {
+  color: #6a9955;
+}
+
+.codeKey {
+  color: #569cd6;
+}
+
+.codeString {
+  color: #ce9178;
+}
+
+.codeFunc {
+  color: #dcdcaa;
+}
+
+
+
+/* ─── FEATURES SECTION ───────────────────────────────────────────────────── */
+.featuresSection {
+  background: #f5f2ed;
+  padding: 0;
+  border-top: 2px solid #34302a;
+}
+
+.sectionHeader {
+  padding: 4rem 3rem 2rem;
+  border-bottom: 2px solid #34302a;
+}
+
+.sectionTitle {
+  font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: #2a2622;
+  margin: 0 0 0.75rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Grid row — no card boxes, separated only by border lines */
+.gridRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 2px solid #34302a;
+}
+
+.gridCol {
+  padding: 2rem;
+  border-right: 2px solid #34302a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.gridCol:last-child {
+  border-right: none;
+}
+
+.gridColTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'SF Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.gridGraphic {
+  font-size: 0.85rem;
+  color: #555;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-family: 'SF Mono', monospace;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.gridColTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #2a2622;
+  margin: 0;
+}
+
+.gridColDesc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #666;
+  margin: 0;
+}
+
+/* ─── DARK RUNTIME SECTION ───────────────────────────────────────────────── */
+.darkSection {
+  background: #1c1b17;
+  color: #fff;
+  border-top: 2px solid #10b981;
+}
+
+.darkInner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  padding: 4rem 3rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  border-bottom: 2px solid #1e1e1e;
+}
+
+.darkEyebrow {
+  color: #10b981;
+  font-family: 'SF Mono', monospace;
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.25rem;
+}
+
+.darkTitle {
+  font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 2rem;
+}
+
+.darkTabList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.darkTab {
+  padding: 1rem 0;
+  border-top: 1px solid #34302a;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.darkTab:last-child {
+  border-bottom: 1px solid #34302a;
+}
+
+.darkTab:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.darkTabActive {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.darkTabTitle {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 0.35rem;
+}
+
+.darkTabDesc {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.darkStage {
+  background: #161616;
+  border: 1.5px solid #33302a;
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 6px 6px 0 #10b981;
+}
+
+.darkStageHeader {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid #34302a;
+  padding-bottom: 0.75rem;
+  color: #888;
+  font-family: 'SF Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  align-items: center;
+}
+
+.darkCode {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.87rem;
+  color: #34d399;
+  line-height: 1.8;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+
+/* Stats row */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 1280px;
+  margin: 0 auto;
+  border-bottom: 2px solid #1e1e1e;
+}
+
+.statCol {
+  padding: 2.5rem 3rem;
+  border-right: 1px solid #1e1e1e;
+  text-align: left;
+}
+
+.statCol:last-child {
+  border-right: none;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+  font-family: 'SF Mono', monospace;
+}
+
+.statLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #555;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+/* ─── STEPS SECTION ─────────────────────────────────────────────────────── */
+.stepsSection {
+  background: #f5f2ed;
+  border-top: 2px solid #34302a;
+}
+
+.stepsGridRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 2px solid #34302a;
+}
+
+.stepCol {
+  padding: 2.5rem 2rem;
+  border-right: 2px solid #34302a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stepCol:last-child {
+  border-right: none;
+}
+
+.stepNumber {
+  width: 38px;
+  height: 38px;
+  background: #2a2622;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+  box-shadow: 3px 3px 0 #10b981;
+}
+
+.stepTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #2a2622;
+  margin: 0;
+}
+
+.stepDesc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #666;
+  margin: 0;
+}
+
+/* ─── CTA BANNER ─────────────────────────────────────────────────────────── */
+.ctaBanner {
+  background: #2a2622;
+  padding: 5rem 3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  border-top: 2px solid #10b981;
+}
+
+.ctaTitle {
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  max-width: 700px;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.ctaBtn {
+  display: inline-block;
+  background: #10b981;
+  color: #2a2622;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 0.9rem 2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  border: 2px solid #10b981;
+  box-shadow: 5px 5px 0 #fff;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.ctaBtn:hover {
+  box-shadow: 7px 7px 0 #fff;
+  transform: translate(-2px, -2px);
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero {
+    padding: 8rem 1.5rem 0;
+  }
+
+  .heroStage {
+    padding: 1rem 0 0;
+  }
+
+  .floatChip {
+    display: none;
+  }
+
+  .gridRow,
+  .stepsGridRow,
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gridCol,
+  .stepCol {
+    border-bottom: 2px solid #34302a;
+  }
+
+  .statCol {
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .darkInner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: 1rem 1.25rem;
+  }
+
+  .navMiddlePill {
+    display: none;
+  }
+
+
+
+  .sectionHeader {
+    padding: 2.5rem 1.25rem 1.5rem;
+  }
+
+  .gridRow,
+  .stepsGridRow,
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .gridCol,
+  .stepCol,
+  .statCol {
+    border-right: none;
+  }
+
+  .darkInner {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .ctaBanner {
+    padding: 3.5rem 1.25rem;
+  }
+}
+
+/* ─── Footer (green) ─────────────────────────────────────────────────────── */
+
+.footer {
+  background: linear-gradient(160deg, #064e3b 0%, #065f46 50%, #047857 100%);
+  color: #d6e6dd;
+  padding: 4rem 2rem 2rem;
+}
+
+.footerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+}
+
+.footerBrandCol {
+  max-width: 22rem;
+}
+
+.footerBrand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+}
+
+.footerTagline {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #a7c7b6;
+  margin-bottom: 1.25rem;
+}
+
+.footerSourceBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #053d2c;
+  background: #6ee7b7;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.footerSourceBtn:hover {
+  filter: brightness(1.06);
+}
+
+.footerColTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.footerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footerList a {
+  font-size: 0.875rem;
+  color: #a7c7b6;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footerList a:hover {
+  color: #ffffff;
+}
+
+.footerBottom {
+  max-width: 1200px;
+  margin: 3rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: #88ab98;
+}
+
+.footerBottom a {
+  color: #88ab98;
+  text-decoration: none;
+}
+
+.footerBottom a:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 860px) {
+  .footerInner {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .footerBrandCol {
+    grid-column: 1 / -1;
+  }
+}
