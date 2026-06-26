@@ -59,7 +59,7 @@ function emptyProject(): ProjectEntry {
 }
 
 function emptyCertification(): CertificationEntry {
-  return { name: '', issuer: '', year: '' }
+  return { name: '', issuer: '', year: '', url: '', issueDate: '', expiryDate: '' }
 }
 
 /**
@@ -858,6 +858,20 @@ export function ResumeForm({
                 />
               </div>
 
+              <div className={`${styles.field} ${styles.fieldFull}`}>
+                <label className={styles.label} htmlFor={`cert-url-${idx}`}>
+                  Credential / Verification Link
+                </label>
+                <input
+                  id={`cert-url-${idx}`}
+                  type="url"
+                  placeholder="https://credly.com/..."
+                  className={styles.input}
+                  value={cert.url || ''}
+                  onChange={(e) => updateCertification(idx, 'url', e.target.value)}
+                />
+              </div>
+
               <div className={styles.field}>
                 <label className={styles.label} htmlFor={`cert-issuer-${idx}`}>
                   Issuer
@@ -865,6 +879,7 @@ export function ResumeForm({
                 <input
                   id={`cert-issuer-${idx}`}
                   type="text"
+                  placeholder="AWS"
                   className={styles.input}
                   value={cert.issuer}
                   onChange={(e) => updateCertification(idx, 'issuer', e.target.value)}
@@ -872,16 +887,33 @@ export function ResumeForm({
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label} htmlFor={`cert-year-${idx}`}>
-                  Year
+                <label className={styles.label} htmlFor={`cert-issueDate-${idx}`}>
+                  Issue Date (or Year)
                 </label>
                 <input
-                  id={`cert-year-${idx}`}
+                  id={`cert-issueDate-${idx}`}
                   type="text"
-                  placeholder="2024"
+                  placeholder="2024-05 or 2024"
                   className={styles.input}
-                  value={cert.year}
-                  onChange={(e) => updateCertification(idx, 'year', e.target.value)}
+                  value={cert.issueDate || cert.year || ''}
+                  onChange={(e) => {
+                    updateCertification(idx, 'issueDate', e.target.value)
+                    updateCertification(idx, 'year', e.target.value)
+                  }}
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor={`cert-expiryDate-${idx}`}>
+                  Expiry Date (Optional)
+                </label>
+                <input
+                  id={`cert-expiryDate-${idx}`}
+                  type="text"
+                  placeholder="2027-05 or Does not expire"
+                  className={styles.input}
+                  value={cert.expiryDate || ''}
+                  onChange={(e) => updateCertification(idx, 'expiryDate', e.target.value || null)}
                 />
               </div>
             </div>

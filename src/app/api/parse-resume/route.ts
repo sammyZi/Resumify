@@ -75,7 +75,10 @@ function buildParsePrompt(text: string): string {
     {
       "name": "string",
       "issuer": "string",
-      "year": "string"
+      "year": "string (legacy year)",
+      "url": "string (verification link or credential URL)",
+      "issueDate": "string (e.g. 2021-05)",
+      "expiryDate": "string or null (e.g. 2024-05 or null if does not expire)"
     }
   ],
   "skills": ["string"],
@@ -97,13 +100,13 @@ You MUST use these URLs carefully:
    - A personal portfolio/website URL → type "website"
    - Any other profile-level URL → type "other"
 
-2. PROJECT-SPECIFIC LINKS (put in the project's liveUrl / repoUrl):
+2. PROJECT & CERTIFICATION SPECIFIC LINKS:
    - A github.com URL with a username AND repo name (e.g. github.com/johndoe/my-project) is a REPO URL → put in "repoUrl" of the matching project
    - A deployed app URL (e.g. vercel.app, netlify.app, herokuapp.com, or any custom domain near a project) → put in "liveUrl" of the matching project
-   - Match links to projects using the display text context. E.g. if display text says "ChatApp" and the URL is github.com/user/chat-app, that URL belongs to the project named ChatApp.
-   - A project may have BOTH a repoUrl AND a liveUrl, just one, or neither. Extract whatever is available.
+   - A credential verification link (e.g. credly.com, udemy.com/certificate/..., coursera.org/verify/...) → put in "url" of the matching certification
+   - Match links using display text context. E.g. if display text says "AWS Certified" and URL is credly.com/..., that URL belongs to AWS Certified.
 
-3. Do NOT put project-specific repo/deploy URLs in the top-level "links" array. Only put profile-level links there.
+3. Do NOT put project or certification URLs in the top-level "links" array. Only put profile-level links there.
 
 OTHER INSTRUCTIONS:
 4. Extract ALL information you can find from the resume text.

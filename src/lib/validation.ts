@@ -51,9 +51,12 @@ const projectEntrySchema = z.object({
 })
 
 const certificationEntrySchema = z.object({
-  name:   z.string().max(200, 'Must be 200 characters or fewer'),
-  issuer: z.string().max(200, 'Must be 200 characters or fewer'),
-  year:   z.string().max(20, 'Must be 20 characters or fewer'),
+  name:       z.string().max(200, 'Must be 200 characters or fewer'),
+  issuer:     z.string().max(200, 'Must be 200 characters or fewer'),
+  year:       z.string().max(20, 'Must be 20 characters or fewer').default(''),
+  url:        z.string().max(300, 'Link must be 300 characters or fewer').optional().default(''),
+  issueDate:  z.string().max(20, 'Must be 20 characters or fewer').optional().default(''),
+  expiryDate: z.string().max(20, 'Must be 20 characters or fewer').nullable().optional().default(null),
 })
 
 // ─── Root schema ─────────────────────────────────────────────────────────────

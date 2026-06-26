@@ -143,10 +143,27 @@ function skillsSection(skills: string[], accent: string): string {
   return sectionTitle('Skills', accent) + `<div style="display:flex;flex-wrap:wrap;gap:5px">${tags}</div>`
 }
 
+function formatCertDate(c: CertificationEntry): string {
+  const start = c.issueDate || c.year || ''
+  if (!start && !c.expiryDate) return ''
+  if (!c.expiryDate) return start
+  return `${start || '—'} – ${c.expiryDate}`
+}
+
 function certificationsSection(certs: CertificationEntry[], accent: string): string {
   if (certs.length === 0) return ''
   return sectionTitle('Certifications', accent) +
-    certs.map((c) => entryHtml(c.name, c.issuer, c.year, '', accent)).join('')
+    certs.map((c) => {
+      const dates = formatCertDate(c)
+      const linkHtml = c.url ? `<a href="${esc(c.url)}" style="color:${accent};text-decoration:none;font-size:9.5pt;margin-left:8px">${icon('globe')} Credential</a>` : ''
+      return `
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+          <span style="font-weight:600;font-size:11pt">${esc(c.name || 'Certification')}${c.issuer ? `<span style="color:#374151;font-weight:400"> · ${esc(c.issuer)}</span>` : ''}${linkHtml}</span>
+          ${dates ? `<span style="color:#6b7280;font-size:9.5pt;white-space:nowrap">${esc(dates)}</span>` : ''}
+        </div>
+      </div>`
+    }).join('')
 }
 
 function achievementsSection(achievements: string[], accent: string): string {

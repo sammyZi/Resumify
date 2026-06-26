@@ -50,9 +50,12 @@ export type ProjectEntry = {
 }
 
 export type CertificationEntry = {
-  name: string    // <= 200 chars
-  issuer: string  // <= 200 chars
-  year: string    // <= 20 chars
+  name: string       // <= 200 chars
+  issuer: string     // <= 200 chars
+  year: string       // <= 20 chars (legacy or year-only)
+  url?: string       // <= 300 chars
+  issueDate?: string // <= 20 chars
+  expiryDate?: string | null // <= 20 chars or null
 }
 
 // ─── Core data shape ─────────────────────────────────────────────────────

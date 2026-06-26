@@ -171,6 +171,13 @@ function ProjectsSection({ data }: { data: ResumeData }) {
   )
 }
 
+function formatCertDate(c: CertificationEntry): string {
+  const start = c.issueDate || c.year || ''
+  if (!start && !c.expiryDate) return ''
+  if (!c.expiryDate) return start
+  return `${start || '—'} – ${c.expiryDate}`
+}
+
 function CertificationsSection({
   certifications,
 }: {
@@ -180,17 +187,31 @@ function CertificationsSection({
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>Certifications</h2>
-      {certifications.map((c, i) => (
-        <div key={i} className={styles.entry}>
-          <div className={styles.entryTop}>
-            <span className={styles.entryTitle}>
-              {c.name || 'Certification'}
-              {c.issuer ? <span className={styles.entryOrg}> · {c.issuer}</span> : null}
-            </span>
-            {c.year ? <span className={styles.entryDates}>{c.year}</span> : null}
+      {certifications.map((c, i) => {
+        const dates = formatCertDate(c)
+        return (
+          <div key={i} className={styles.entry}>
+            <div className={styles.entryTop}>
+              <span className={styles.entryTitle}>
+                {c.name || 'Certification'}
+                {c.issuer ? <span className={styles.entryOrg}> · {c.issuer}</span> : null}
+                {c.url ? (
+                  <a
+                    href={c.url}
+                    className={styles.linkItem}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ marginLeft: '0.5rem', fontWeight: 'normal' }}
+                  >
+                    <LinkIcon type="website" /> Credential
+                  </a>
+                ) : null}
+              </span>
+              {dates ? <span className={styles.entryDates}>{dates}</span> : null}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </section>
   )
 }
@@ -321,12 +342,21 @@ export function ResumeDocument({
             <>
               <h2 className={styles.sidebarTitle}>Certifications</h2>
               <ul className={styles.sidebarSkills}>
-                {data.certifications.map((c, i) => (
-                  <li key={i}>
-                    {c.name}
-                    {c.year ? ` (${c.year})` : ''}
-                  </li>
-                ))}
+                {data.certifications.map((c, i) => {
+                  const dates = formatCertDate(c)
+                  return (
+                    <li key={i}>
+                      {c.url ? (
+                        <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline' }}>
+                          {c.name}
+                        </a>
+                      ) : (
+                        c.name
+                      )}
+                      {dates ? ` (${dates})` : ''}
+                    </li>
+                  )
+                })}
               </ul>
             </>
           ) : null}
