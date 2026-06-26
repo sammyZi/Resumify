@@ -40,17 +40,17 @@ body {
 ─────────────────────────────────────────────────────────────────────────── */
 
 [data-theme='dark'] {
-  --color-background:    #1e2422;
-  --color-surface:       #28302c;
+  --color-background:    #161b19;
+  --color-surface:       #1f2624;
   --color-text-primary:  #eaf3ee;
   --color-text-secondary:#a6b8af;
-  --color-border:        #3a443f;
+  --color-border:        #323b37;
   --color-primary:       #00F27A;
   --color-primary-text:  #07150d;
   --color-accent:        #00F27A;
 
   /* Legacy aliases */
-  --background: #1e2422;
+  --background: #161b19;
   --foreground: #eaf3ee;
 }
 
