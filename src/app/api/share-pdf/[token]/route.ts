@@ -10,6 +10,7 @@ import type { NextRequest } from 'next/server'
 import { resolveShare } from '@/lib/services/share-service'
 import { buildResumeHtml } from '@/lib/templates/build-resume-html'
 import { getTemplateMeta } from '@/lib/templates/registry'
+import { launchBrowser } from '@/lib/templates/pdf-browser'
 
 export async function GET(
   _request: NextRequest,
@@ -26,11 +27,7 @@ export async function GET(
   const template = getTemplateMeta(templateId)
   const html = buildResumeHtml(template, resumeData)
 
-  const puppeteer = await import('puppeteer')
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  })
+  const browser = await launchBrowser()
 
   try {
     const page = await browser.newPage()
