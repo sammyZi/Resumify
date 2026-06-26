@@ -141,7 +141,6 @@ export async function createShare(
 }
 
 // ─── resolveShare ─────────────────────────────────────────────────────────────
-
 /**
  * Resolves a share token to its associated share row and limited resume data.
  *
