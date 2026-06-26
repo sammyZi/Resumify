@@ -10,7 +10,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@sparticuz/chromium": "^149.0.0",
+    "@sparticuz/chromium-min": "^149.0.0",
     "@supabase/ssr": "0.6.1",
     "@supabase/supabase-js": "2.49.4",
     "@tanstack/react-query": "5.74.4",
