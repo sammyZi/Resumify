@@ -3,12 +3,14 @@
 /**
  * shared-resume-view.tsx — public recruiter view of a resume.
  *
- * Renders the resume in its selected template and offers a print-to-PDF
- * download. No app chrome, no auth — this is a public page.
+ * Renders the resume in its selected template with a polished, branded frame.
+ * Download produces a clean server-generated PDF (clickable links, no chrome)
+ * via /api/share-pdf/:token. No app chrome, no auth — this is a public page.
  */
 
 import type { ResumeData } from '@/lib/types'
 import { ResumeDocument } from '@/lib/templates/resume-document'
+import { BrandLogo } from '@/components/brand-logo'
 import styles from './shared-resume-view.module.css'
 
 const IconDownload = () => (
@@ -20,27 +22,36 @@ const IconDownload = () => (
 )
 
 export function SharedResumeView({
+  token,
   templateId,
   data,
 }: {
+  token: string
   templateId: string | null
   data: ResumeData
 }) {
+  const name = data.fullName || 'Resume'
+
   return (
     <div className={styles.wrap}>
       <header className={styles.toolbar}>
         <div className={styles.brand}>
-          <span className={styles.brandIcon} aria-hidden="true">R</span>
-          <span>Shared Resume</span>
+          <span className={styles.brandMark}><BrandLogo size={26} /></span>
+          <div className={styles.brandText}>
+            <span className={styles.brandName}>{name}</span>
+            <span className={styles.brandSub}>Shared résumé</span>
+          </div>
         </div>
-        <button
-          type="button"
+
+        <a
           className={styles.downloadBtn}
-          onClick={() => window.print()}
+          href={`/api/share-pdf/${token}`}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <IconDownload />
           <span>Download PDF</span>
-        </button>
+        </a>
       </header>
 
       <main className={styles.stage}>
@@ -48,6 +59,13 @@ export function SharedResumeView({
           <ResumeDocument templateId={templateId} data={data} />
         </div>
       </main>
+
+      <footer className={styles.footer}>
+        <span>Made with</span>
+        <a href="/" className={styles.footerLink}>Resumify</a>
+        <span className={styles.footerDot}>·</span>
+        <a href="/" className={styles.footerLink}>Create your own resume free</a>
+      </footer>
     </div>
   )
 }

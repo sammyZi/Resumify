@@ -12,9 +12,9 @@
 
 import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
+import { BrandLogo } from '@/components/brand-logo'
 import { ToastContainer } from './_components/toast'
 import { ThemeToggle } from './_components/theme-toggle'
 import { ConfirmModal } from './_components/confirm-modal'
@@ -121,14 +121,9 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
     <div className={styles.shell}>
       <nav className={styles.nav} aria-label="Main navigation">
         <Link href="/resumes" className={styles.navBrand}>
-          <Image
-            src="/icon.svg"
-            alt=""
-            width={28}
-            height={28}
-            className={styles.navBrandMark}
-            priority
-          />
+          <span className={styles.navBrandMark}>
+            <BrandLogo size={20} />
+          </span>
           Resumify
         </Link>
 

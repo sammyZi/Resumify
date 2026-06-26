@@ -43,9 +43,13 @@
 
 .navBrandMark {
   display: inline-flex;
-  width: 1.75rem;
-  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
   border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
 }
 
 .navLinks {

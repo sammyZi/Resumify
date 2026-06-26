@@ -32,7 +32,7 @@ export default async function RecruiterSharePage({ params }: PageProps) {
     return <LinkUnavailable />
   }
 
-  return <SharedResumeView templateId={templateId} data={resumeData} />
+  return <SharedResumeView token={token} templateId={templateId} data={resumeData} />
 }
 
 // ─── Link Unavailable ─────────────────────────────────────────────────────────
@@ -40,31 +40,49 @@ export default async function RecruiterSharePage({ params }: PageProps) {
 function LinkUnavailable() {
   return (
     <main style={styles.container}>
+      <div style={styles.badge} aria-hidden="true">⚠</div>
       <h1 style={styles.heading}>Link unavailable</h1>
       <p style={styles.body}>
         This share link has been revoked or does not exist. Please ask the
         sender for an updated link.
       </p>
+      <a href="/" style={styles.homeLink}>Go to Resumify →</a>
     </main>
   )
 }
 
 const styles = {
   container: {
-    maxWidth: '960px',
-    margin: '0 auto',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
     padding: '4rem 1.5rem',
     fontFamily: 'Rubik, system-ui, sans-serif',
     textAlign: 'center' as const,
+    background: 'var(--color-background)',
+  },
+  badge: {
+    fontSize: '2rem',
+    marginBottom: '0.5rem',
   },
   heading: {
     fontSize: '1.5rem',
-    fontWeight: 600,
-    marginBottom: '1rem',
-    color: 'var(--color-text-primary, #1a1a1a)',
+    fontWeight: 700,
+    color: 'var(--color-text-primary)',
   },
   body: {
     fontSize: '1rem',
-    color: 'var(--color-text-secondary, #555)',
+    maxWidth: '26rem',
+    color: 'var(--color-text-secondary)',
+  },
+  homeLink: {
+    marginTop: '1.25rem',
+    fontSize: '0.9375rem',
+    fontWeight: 600,
+    color: 'var(--color-primary)',
+    textDecoration: 'none',
   },
 } as const
