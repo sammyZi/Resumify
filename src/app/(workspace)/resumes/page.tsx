@@ -23,6 +23,7 @@ import type { Resume, ResumeData } from '@/lib/types'
 import { getTemplateMeta } from '@/lib/templates/registry'
 import { ConfirmModal } from '../_components/confirm-modal'
 import { CardMenu } from '../_components/card-menu'
+import { ShareModal } from '../_components/share-modal'
 import { PdfImportButton } from '../_components/pdf-import-button'
 import styles from '../_components/workspace-ui.module.css'
 
@@ -70,18 +71,6 @@ async function renameResume(id: string, title: string): Promise<void> {
   })
   if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
   if (!res.ok) throw new Error('Failed to rename resume')
-}
-
-async function shareResume(resumeId: string): Promise<string> {
-  const res = await fetch('/api/shares', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ resumeId, kind: 'recruiter' }),
-  })
-  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
-  if (!res.ok) throw new Error('Failed to create share link')
-  const { share } = await res.json()
-  return `${window.location.origin}/s/${share.token}`
 }
 
 function initials(name: string): string {
@@ -179,7 +168,7 @@ export default function DashboardPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Resume | null>(null)
   const [renameTarget, setRenameTarget] = useState<Resume | null>(null)
-  const [sharingId, setSharingId] = useState<string | null>(null)
+  const [shareTarget, setShareTarget] = useState<Resume | null>(null)
   const [isImporting, setIsImporting] = useState(false)
 
   const { data: resumes, isLoading, isError } = useQuery({
@@ -231,19 +220,6 @@ export default function DashboardPage() {
     },
     onError: () => { addToast('Failed to rename resume.', 'error') },
   })
-
-  async function handleShare(resume: Resume) {
-    setSharingId(resume.id)
-    try {
-      const url = await shareResume(resume.id)
-      await navigator.clipboard.writeText(url).catch(() => {})
-      addToast('Share link copied to clipboard.', 'success')
-    } catch {
-      addToast('Failed to create share link.', 'error')
-    } finally {
-      setSharingId(null)
-    }
-  }
 
   const count = resumes?.length ?? 0
 
@@ -339,8 +315,7 @@ export default function DashboardPage() {
                     )}
                     <CardMenu
                       resumeName={name}
-                      isSharing={sharingId === resume.id}
-                      onShare={() => handleShare(resume)}
+                      onShare={() => setShareTarget(resume)}
                       onRename={() => { setRenameTarget(resume) }}
                       onDelete={() => { setDeleteTarget(resume) }}
                     />
@@ -383,6 +358,14 @@ export default function DashboardPage() {
           isPending={renameMutation.isPending}
           onConfirm={(title) => renameMutation.mutate({ id: renameTarget.id, name: title })}
           onCancel={() => setRenameTarget(null)}
+        />
+      )}
+
+      {shareTarget && (
+        <ShareModal
+          resumeId={shareTarget.id}
+          resumeName={shareTarget.title || shareTarget.fullName || 'Untitled resume'}
+          onClose={() => setShareTarget(null)}
         />
       )}
     </>

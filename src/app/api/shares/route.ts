@@ -10,10 +10,35 @@
  */
 
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { createShare } from '@/lib/services/share-service'
+import { createShare, listSharesByResume } from '@/lib/services/share-service'
 
 const VALID_KINDS = ['recruiter', 'template'] as const
 type ShareKind = (typeof VALID_KINDS)[number]
+
+// ─── GET /api/shares?resumeId=... ─────────────────────────────────────────────
+
+export async function GET(request: Request) {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const resumeId = new URL(request.url).searchParams.get('resumeId')
+  if (!resumeId) {
+    return Response.json({ error: 'resumeId is required' }, { status: 400 })
+  }
+
+  const result = await listSharesByResume(user.id, resumeId)
+  if (!result.ok) {
+    return Response.json({ error: result.error.message }, { status: 500 })
+  }
+
+  return Response.json({ shares: result.value })
+}
 
 export async function POST(request: Request) {
   // 1. Require authenticated session.

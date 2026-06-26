@@ -140,6 +140,33 @@ export async function createShare(
   return ok(rowToShare(data as ShareRow))
 }
 
+// ─── listSharesByResume ───────────────────────────────────────────────────────
+
+/**
+ * Lists all non-revoked shares for a resume owned by `userId`.
+ * RLS ensures the caller only sees their own shares.
+ */
+export async function listSharesByResume(
+  userId: string,
+  resumeId: string
+): Promise<Result<Share[], ShareError>> {
+  const supabase = await createSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from('shares')
+    .select('*')
+    .eq('owner_id', userId)
+    .eq('resume_id', resumeId)
+    .eq('revoked', false)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return err({ kind: 'not_found', message: error.message })
+  }
+
+  return ok((data as ShareRow[]).map(rowToShare))
+}
+
 // ─── resolveShare ─────────────────────────────────────────────────────────────
 /**
  * Resolves a share token to its associated share row and limited resume data.

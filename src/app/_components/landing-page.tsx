@@ -238,7 +238,7 @@ const share = await createShareToken({
         <section className={styles.hero}>
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              HIGH-PERFORMANCE<br />RESUME BUILDER<br />
+              AI-POWERED<br />RESUME BUILDER<br />
               <span className={styles.heroRoleLine}>
                 FOR <span className={styles.typedWord}>{typed}</span>
                 <span className={styles.blinkingBar} aria-hidden="true" />
