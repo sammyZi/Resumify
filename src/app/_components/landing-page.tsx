@@ -39,7 +39,7 @@ function IconLink() {
   )
 }
 
-const ROLES = ['AI', 'TECH', 'STARTUPS', 'ENGINEERING']
+const ROLES = ['STUDENTS', 'PROFESSIONALS', 'ENGINEERS', 'DESIGNERS', 'GRADUATES']
 
 /** Smoothly scroll to an in-page section by id. */
 function scrollToSection(e: React.MouseEvent, id: string) {
