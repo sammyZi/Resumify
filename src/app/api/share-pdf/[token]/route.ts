@@ -12,6 +12,10 @@ import { buildResumeHtml } from '@/lib/templates/build-resume-html'
 import { getTemplateMeta } from '@/lib/templates/registry'
 import { launchBrowser } from '@/lib/templates/pdf-browser'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ token: string }> }

@@ -15,6 +15,11 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getResume } from '@/lib/stores/resume-store'
 import { buildResumeHtml } from '@/lib/templates/build-resume-html'
 import { getTemplateMeta } from '@/lib/templates/registry'
+import { launchBrowser } from '@/lib/templates/pdf-browser'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 export async function GET(
   _request: NextRequest,
@@ -54,12 +59,8 @@ export async function GET(
   })
 
   // ── 4. Render to PDF with Puppeteer ─────────────────────────────────────────
-  // Dynamic import keeps Puppeteer out of the client bundle.
-  const puppeteer = await import('puppeteer')
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  })
+  // launchBrowser() picks full puppeteer locally and @sparticuz/chromium on Vercel.
+  const browser = await launchBrowser()
 
   try {
     const page = await browser.newPage()

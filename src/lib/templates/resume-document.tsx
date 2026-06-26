@@ -231,46 +231,41 @@ function AchievementsSection({ achievements }: { achievements: string[] }) {
 }
 
 function ExperienceSection({ data }: { data: ResumeData }) {
+  if (data.experience.length === 0) return null
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>Experience</h2>
-      {data.experience.length > 0 ? (
-        data.experience.map((entry, i) => <ExperienceItem key={i} entry={entry} />)
-      ) : (
-        <p className={styles.empty}>No experience added yet.</p>
-      )}
+      {data.experience.map((entry, i) => (
+        <ExperienceItem key={i} entry={entry} />
+      ))}
     </section>
   )
 }
 
 function EducationSection({ data }: { data: ResumeData }) {
+  if (data.education.length === 0) return null
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>Education</h2>
-      {data.education.length > 0 ? (
-        data.education.map((entry, i) => <EducationItem key={i} entry={entry} />)
-      ) : (
-        <p className={styles.empty}>No education added yet.</p>
-      )}
+      {data.education.map((entry, i) => (
+        <EducationItem key={i} entry={entry} />
+      ))}
     </section>
   )
 }
 
 function SkillsSection({ data }: { data: ResumeData }) {
+  if (data.skills.length === 0) return null
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>Skills</h2>
-      {data.skills.length > 0 ? (
-        <div className={styles.skills}>
-          {data.skills.map((skill, i) => (
-            <span key={i} className={styles.skill}>
-              {skill}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <p className={styles.empty}>No skills added yet.</p>
-      )}
+      <div className={styles.skills}>
+        {data.skills.map((skill, i) => (
+          <span key={i} className={styles.skill}>
+            {skill}
+          </span>
+        ))}
+      </div>
     </section>
   )
 }
@@ -327,16 +322,16 @@ export function ResumeDocument({
             )}
           </div>
 
-          <h2 className={styles.sidebarTitle}>Skills</h2>
           {data.skills.length > 0 ? (
-            <ul className={styles.sidebarSkills}>
-              {data.skills.map((skill, i) => (
-                <li key={i}>{skill}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className={styles.empty}>No skills added yet.</p>
-          )}
+            <>
+              <h2 className={styles.sidebarTitle}>Skills</h2>
+              <ul className={styles.sidebarSkills}>
+                {data.skills.map((skill, i) => (
+                  <li key={i}>{skill}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
 
           {data.certifications.length > 0 ? (
             <>
