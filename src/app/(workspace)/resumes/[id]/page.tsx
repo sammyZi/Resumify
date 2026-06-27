@@ -22,6 +22,7 @@ import type { Resume, ResumeData } from '@/lib/types'
 import { ResumeForm } from '../../_components/resume-form'
 import { PdfImportButton } from '../../_components/pdf-import-button'
 import { ShareModal } from '../../_components/share-modal'
+import { JobMatchModal } from '../../_components/job-match-modal'
 import type { RefinementSuggestion } from '../../_components/refine-panel'
 import styles from '../../_components/workspace-ui.module.css'
 
@@ -79,6 +80,7 @@ export default function ResumeEditorPage({
   const [draftKey, setDraftKey] = useState(0)
 
   const [shareOpen, setShareOpen] = useState(false)
+  const [matchOpen, setMatchOpen] = useState(false)
 
   const { data: resume, isLoading, isError, error } = useQuery({
     queryKey: queryKeys.resume(id),
@@ -220,6 +222,10 @@ export default function ResumeEditorPage({
             disabled={saveMutation.isPending}
           />
           <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+            onClick={() => setMatchOpen(true)}>
+            Job match
+          </button>
+          <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
             onClick={() => setShareOpen(true)}>
             Share
           </button>
@@ -262,6 +268,22 @@ export default function ResumeEditorPage({
         </div>
       </section>
 
+      {/* ── Job match ────────────────────────────────────────────────────── */}
+      <section className={styles.section} style={{ marginTop: '2rem' }}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Tailor to a job</h2>
+        </div>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem' }}>
+          Paste a job description to see how well this resume matches, your estimated
+          chance of selection, and what to improve.
+        </p>
+        <div style={{ marginTop: '0.5rem' }}>
+          <button type="button" className={styles.button} onClick={() => setMatchOpen(true)}>
+            Check job match
+          </button>
+        </div>
+      </section>
+
       {/* ── Sharing ──────────────────────────────────────────────────────── */}
       <div className={styles.section} style={{ marginTop: '2rem' }}>
         <div className={styles.sectionHeader}>
@@ -283,6 +305,14 @@ export default function ResumeEditorPage({
           resumeId={id}
           resumeName={resume.title || resume.fullName || 'Untitled resume'}
           onClose={() => setShareOpen(false)}
+        />
+      )}
+
+      {matchOpen && (
+        <JobMatchModal
+          resumeId={id}
+          resumeName={resume.title || resume.fullName || 'Untitled resume'}
+          onClose={() => setMatchOpen(false)}
         />
       )}
     </>
