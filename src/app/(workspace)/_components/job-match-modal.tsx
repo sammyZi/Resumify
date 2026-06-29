@@ -3,9 +3,10 @@
 /**
  * job-match-modal.tsx — paste a job description and score the resume against it.
  *
- * Calls POST /api/resumes/:id/match and renders a match report: an overall
- * score, an estimated chance of selection, matched/missing keywords, strengths,
- * gaps, and actionable suggestions. Read-only — nothing is persisted.
+ * Calls POST /api/resumes/:id/match and renders a match report. Optionally
+ * calls POST /api/resumes/:id/tailor to generate a tailored version of skills,
+ * experience descriptions, and summary. Tailored changes are returned to the
+ * parent for accept/discard — nothing is persisted automatically.
  */
 
 import { useEffect, useState } from 'react'
@@ -22,6 +23,12 @@ type JobMatchResult = {
   strengths: string[]
   gaps: string[]
   suggestions: string[]
+}
+
+type TailoredResume = {
+  skills: string[]
+  experience: { title: string; organization: string; startDate: string; endDate: string | null; description: string }[]
+  summary: string
 }
 
 const MAX_CHARS = 12000
@@ -44,15 +51,21 @@ export function JobMatchModal({
   resumeId,
   resumeName,
   onClose,
+  onTailor,
 }: {
   resumeId: string
   resumeName: string
   onClose: () => void
+  /** Called when the user accepts the tailored resume. Parent is responsible for applying + saving. */
+  onTailor?: (tailored: TailoredResume) => void
 }) {
   const [jobDescription, setJobDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<JobMatchResult | null>(null)
+  const [tailoring, setTailoring] = useState(false)
+  const [tailored, setTailored] = useState<TailoredResume | null>(null)
+  const [tailorError, setTailorError] = useState<string | null>(null)
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -74,6 +87,8 @@ export function JobMatchModal({
     }
     setLoading(true)
     setError(null)
+    setTailored(null)
+    setTailorError(null)
     try {
       const res = await fetch(`/api/resumes/${resumeId}/match`, {
         method: 'POST',
@@ -95,6 +110,43 @@ export function JobMatchModal({
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleTailor() {
+    setTailoring(true)
+    setTailorError(null)
+    try {
+      const res = await fetch(`/api/resumes/${resumeId}/tailor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobDescription }),
+      })
+      if (res.status === 401) {
+        window.location.href = '/login'
+        return
+      }
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setTailorError(data.message ?? 'Failed to tailor resume.')
+        return
+      }
+      setTailored(data.result as TailoredResume)
+    } catch {
+      setTailorError('Failed to tailor resume. Please try again.')
+    } finally {
+      setTailoring(false)
+    }
+  }
+
+  function handleAcceptTailor() {
+    if (tailored && onTailor) {
+      onTailor(tailored)
+      onClose()
+    }
+  }
+
+  function handleDiscardTailor() {
+    setTailored(null)
   }
 
   return (
@@ -268,6 +320,80 @@ export function JobMatchModal({
                     <li key={i}>{s}</li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* ── Tailor ───────────────────────────────────────────────── */}
+            {onTailor && (
+              <div className={styles.tailorSection}>
+                <hr className={styles.divider} />
+                {!tailored ? (
+                  <div className={styles.tailorPrompt}>
+                    <div>
+                      <span className={styles.blockTitle}>Auto-tailor your resume</span>
+                      <p className={styles.tailorDesc}>
+                        AI will add relevant skills, rewrite experience descriptions, and
+                        update your summary to match this job. You can review changes before saving.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.tailorBtn}
+                      onClick={handleTailor}
+                      disabled={tailoring}
+                    >
+                      {tailoring ? (
+                        <><span className={styles.spinner} /> Tailoring…</>
+                      ) : (
+                        '✨ Tailor resume'
+                      )}
+                    </button>
+                    {tailorError && <p className={styles.error}>{tailorError}</p>}
+                  </div>
+                ) : (
+                  <div className={styles.tailorResult}>
+                    <span className={styles.blockTitle}>Tailored resume ready</span>
+                    <p className={styles.tailorDesc}>
+                      Skills, experience descriptions, and summary have been rewritten
+                      to align with this job. Review the changes below.
+                    </p>
+
+                    <div className={styles.tailorPreview}>
+                      <div className={styles.tailorPreviewBlock}>
+                        <span className={styles.tailorPreviewLabel}>Summary</span>
+                        <p className={styles.tailorPreviewText}>{tailored.summary}</p>
+                      </div>
+
+                      <div className={styles.tailorPreviewBlock}>
+                        <span className={styles.tailorPreviewLabel}>Skills ({tailored.skills.length})</span>
+                        <div className={styles.chips}>
+                          {tailored.skills.map((s, i) => (
+                            <span key={i} className={`${styles.chip} ${styles.chipMatched}`}>{s}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className={styles.tailorPreviewBlock}>
+                        <span className={styles.tailorPreviewLabel}>Experience ({tailored.experience.length} entries)</span>
+                        {tailored.experience.map((e, i) => (
+                          <div key={i} className={styles.tailorExpEntry}>
+                            <strong>{e.title}</strong> · {e.organization}
+                            <p className={styles.tailorPreviewText}>{e.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={styles.tailorActions}>
+                      <button type="button" className={styles.analyzeBtn} onClick={handleAcceptTailor}>
+                        Accept &amp; apply
+                      </button>
+                      <button type="button" className={styles.tailorDiscardBtn} onClick={handleDiscardTailor}>
+                        Discard
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

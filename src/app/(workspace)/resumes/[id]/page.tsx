@@ -319,6 +319,17 @@ export default function ResumeEditorPage({
           resumeId={id}
           resumeName={resume.title || resume.fullName || 'Untitled resume'}
           onClose={() => setMatchOpen(false)}
+          onTailor={(tailored) => {
+            const base: ResumeData = draftData ?? initialData
+            setDraftData({
+              ...base,
+              skills: tailored.skills,
+              experience: tailored.experience,
+              summary: tailored.summary,
+            })
+            setDraftKey((k) => k + 1)
+            addToast('Resume tailored — review the changes and save.', 'success')
+          }}
         />
       )}
     </>

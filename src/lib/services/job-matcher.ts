@@ -260,3 +260,164 @@ export async function matchJob(input: {
 
   return err(lastError)
 }
+
+// ─── Tailor types ──────────────────────────────────────────────────────────────
+
+export type TailoredResume = {
+  /** Skills tailored for the JD — adds relevant, removes irrelevant. */
+  skills: string[]
+  /** Experience entries with rewritten descriptions aligned to the JD. */
+  experience: { title: string; organization: string; startDate: string; endDate: string | null; description: string }[]
+  /** Summary rewritten to align with the JD. */
+  summary: string
+}
+
+// ─── tailorResume ──────────────────────────────────────────────────────────────
+
+function buildTailorPrompt(resumeSnapshot: string, jobDescription: string, resumeData: ResumeData): string {
+  const expJson = JSON.stringify(resumeData.experience)
+  const skillsJson = JSON.stringify(resumeData.skills)
+  return `You are an expert resume tailoring assistant. Given the candidate's current resume and a target JOB DESCRIPTION, produce a tailored version that maximizes ATS match.
+
+=== CURRENT RESUME ===
+${resumeSnapshot}
+
+=== JOB DESCRIPTION ===
+${jobDescription}
+
+=== CURRENT SKILLS JSON ===
+${skillsJson}
+
+=== CURRENT EXPERIENCE JSON ===
+${expJson}
+
+Instructions:
+1. SKILLS: Add important skills/technologies from the JD that the candidate plausibly has (based on their experience). Remove skills that are completely irrelevant to the job. Keep skills that are transferable or useful. You may reorder for relevance.
+2. EXPERIENCE: Rewrite ONLY the "description" field of each experience entry to emphasize responsibilities and achievements that align with the JD. Keep the same number of experience entries; preserve "title", "organization", "startDate", "endDate" EXACTLY.
+3. SUMMARY: Write a new 2-3 sentence professional summary that positions the candidate as a strong fit for this specific role.
+4. Do NOT invent experience, certifications, or skills the candidate does not demonstrably have.
+5. Do NOT include LaTeX, markdown formatting, or code in descriptions.
+
+Return ONLY a valid JSON object:
+{
+  "skills": ["skill1", "skill2", ...],
+  "experience": [{"title":"...","organization":"...","startDate":"...","endDate":"...","description":"..."},...],
+  "summary": "..."
+}`
+}
+
+function parseTailorResponse(raw: string, resumeData: ResumeData): TailoredResume | null {
+  try {
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/, '')
+      .trim()
+    const parsed = JSON.parse(cleaned) as Record<string, unknown>
+
+    const skills = toStringArray(parsed.skills)
+    if (skills.length === 0) return null
+
+    const summary = typeof parsed.summary === 'string' ? parsed.summary.trim() : resumeData.summary
+
+    const experience: TailoredResume['experience'] = []
+    if (Array.isArray(parsed.experience)) {
+      for (let i = 0; i < parsed.experience.length; i++) {
+        const e = parsed.experience[i] as Record<string, unknown> | undefined
+        const orig = resumeData.experience[i]
+        if (!e || !orig) continue
+        experience.push({
+          title: typeof e.title === 'string' ? e.title : orig.title,
+          organization: typeof e.organization === 'string' ? e.organization : orig.organization,
+          startDate: typeof e.startDate === 'string' ? e.startDate : orig.startDate,
+          endDate: typeof e.endDate === 'string' ? e.endDate : (orig.endDate ?? null),
+          description: typeof e.description === 'string' ? e.description : orig.description,
+        })
+      }
+    }
+
+    // If model returned fewer entries, fill remaining from original
+    for (let i = experience.length; i < resumeData.experience.length; i++) {
+      experience.push(resumeData.experience[i])
+    }
+
+    return { skills, experience, summary }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Tailors the resume's skills, experience descriptions, and summary to match
+ * the given job description. Makes up to 3 attempts, each bounded to 60s.
+ */
+export async function tailorResume(input: {
+  resumeData: ResumeData
+  jobDescription: string
+}): Promise<Result<TailoredResume, AppError>> {
+  const jobDescription = input.jobDescription.trim().slice(0, MAX_JD_CHARS)
+
+  if (jobDescription.length < 20) {
+    return err({
+      code: 'tailor_empty',
+      message: 'Please paste a longer job description.',
+    })
+  }
+
+  const { resumeData } = input
+  const resumeSnapshot = buildResumeSnapshot(resumeData)
+  const client = new OpenAI({ apiKey: serverEnv.openaiApiKey })
+  const prompt = buildTailorPrompt(resumeSnapshot, jobDescription, resumeData)
+
+  let lastError: AppError = { code: 'tailor_failed', message: 'Unknown error' }
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const signal = AbortSignal.timeout(TIMEOUT_MS)
+
+      const response = await client.chat.completions.create(
+        {
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          response_format: { type: 'json_object' },
+        },
+        { signal }
+      )
+
+      const raw = response.choices[0]?.message?.content?.trim() ?? ''
+
+      if (!raw) {
+        lastError = { code: 'tailor_failed', message: 'OpenAI returned an empty response' }
+        continue
+      }
+
+      const result = parseTailorResponse(raw, resumeData)
+
+      if (!result) {
+        lastError = {
+          code: 'tailor_failed',
+          message: `Failed to parse tailoring response (attempt ${attempt}/${MAX_ATTEMPTS})`,
+        }
+        continue
+      }
+
+      return ok(result)
+    } catch (e: unknown) {
+      const isTimeout =
+        e instanceof Error &&
+        (e.name === 'TimeoutError' || e.name === 'AbortError' || e.message.includes('timeout'))
+
+      if (isTimeout) {
+        lastError = {
+          code: 'tailor_timeout',
+          message: `Tailoring timed out after ${TIMEOUT_MS / 1000}s (attempt ${attempt}/${MAX_ATTEMPTS})`,
+        }
+      } else {
+        const message = e instanceof Error ? e.message : 'OpenAI request failed'
+        lastError = { code: 'tailor_failed', message }
+      }
+    }
+  }
+
+  return err(lastError)
+}
