@@ -385,10 +385,7 @@ const share = await createShareToken({
             <div className={styles.statNumber}>10+</div>
             <div className={styles.statLabel}>Modern Templates</div>
           </div>
-          <div className={styles.statCol}>
-            <div className={styles.statNumber}>100K+</div>
-            <div className={styles.statLabel}>Resumes Built</div>
-          </div>
+          
         </div>
       </section>
 
