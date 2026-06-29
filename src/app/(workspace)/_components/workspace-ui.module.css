@@ -604,6 +604,78 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, #dc2626 20%, transparent);
 }
 
+/* ── Search bar ──────────────────────────────────────────────────────────── */
+
+.searchBar {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.625rem 0.875rem 0.625rem 2.375rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.searchClear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.searchClear:hover {
+  color: var(--color-text-primary);
+  background: var(--color-border);
+}
+
+.noResults {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+}
+
 .textarea {
   resize: vertical;
   min-height: 6rem;

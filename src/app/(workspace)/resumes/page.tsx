@@ -14,7 +14,7 @@
  */
 
 import { useRouter } from 'next/navigation'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
@@ -180,6 +180,7 @@ export default function DashboardPage() {
   const [renameTarget, setRenameTarget] = useState<Resume | null>(null)
   const [shareTarget, setShareTarget] = useState<Resume | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { data: resumes, isLoading, isError } = useQuery({
     queryKey: queryKeys.resumes(),
@@ -243,6 +244,17 @@ export default function DashboardPage() {
 
   const count = resumes?.length ?? 0
 
+  const filteredResumes = useMemo(() => {
+    if (!resumes || !searchQuery.trim()) return resumes ?? []
+    const q = searchQuery.toLowerCase().trim()
+    return resumes.filter((r) => {
+      const name = (r.title || r.fullName || '').toLowerCase()
+      const email = (r.email || '').toLowerCase()
+      const skills = r.skills.join(' ').toLowerCase()
+      return name.includes(q) || email.includes(q) || skills.includes(q)
+    })
+  }, [resumes, searchQuery])
+
   return (
     <>
       <div className={styles.pageHeader}>
@@ -272,6 +284,36 @@ export default function DashboardPage() {
           />
         </div>
       </div>
+
+      {/* Search bar — only shown when there are resumes */}
+      {!isLoading && !isError && count > 0 && (
+        <div className={styles.searchBar}>
+          <span className={styles.searchIcon}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search resumes by name, email, or skills…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className={styles.searchClear}
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
 
       {isLoading && (
         <div className={styles.cardGrid} aria-hidden="true">
@@ -311,9 +353,15 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {!isLoading && !isError && resumes && count > 0 && (
+      {!isLoading && !isError && resumes && count > 0 && filteredResumes.length === 0 && (
+        <div className={styles.noResults}>
+          No resumes match &ldquo;{searchQuery}&rdquo;
+        </div>
+      )}
+
+      {!isLoading && !isError && resumes && filteredResumes.length > 0 && (
         <div className={styles.cardGrid}>
-          {resumes.map((resume) => {
+          {filteredResumes.map((resume) => {
             const name = resume.title || resume.fullName || 'Untitled resume'
             return (
               <Link
