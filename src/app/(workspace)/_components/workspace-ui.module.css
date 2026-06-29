@@ -604,12 +604,21 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, #dc2626 20%, transparent);
 }
 
-/* ── Search bar ──────────────────────────────────────────────────────────── */
+/* ── Dashboard toolbar & search ──────────────────────────────────────────── */
+
+.dashboardToolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
 
 .searchBar {
   position: relative;
-  width: 100%;
-  max-width: 24rem;
+  flex: 1;
+  max-width: 22rem;
 }
 
 .searchIcon {
@@ -625,9 +634,9 @@
 
 .searchInput {
   width: 100%;
-  padding: 0.625rem 0.875rem 0.625rem 2.375rem;
+  padding: 0.5625rem 2.25rem 0.5625rem 2.375rem;
   font: inherit;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--color-text-primary);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -667,6 +676,12 @@
 .searchClear:hover {
   color: var(--color-text-primary);
   background: var(--color-border);
+}
+
+.searchCount {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .noResults {
