@@ -30,6 +30,24 @@ function linkText(link: ResumeLink): string {
   return prettyUrl(link.url) || linkLabel(link.type)
 }
 
+/**
+ * Renders a description string. If it contains newlines, each non-empty line
+ * becomes a bullet point. Single-line text renders as a plain paragraph.
+ */
+function DescriptionContent({ text }: { text: string }) {
+  const lines = text.split(/\n/).map((l) => l.trim()).filter(Boolean)
+  if (lines.length <= 1) {
+    return <>{text}</>
+  }
+  return (
+    <ul className={styles.bulletList}>
+      {lines.map((line, i) => (
+        <li key={i}>{line}</li>
+      ))}
+    </ul>
+  )
+}
+
 function ExperienceItem({ entry }: { entry: ExperienceEntry }) {
   return (
     <div className={styles.entry}>
@@ -42,7 +60,7 @@ function ExperienceItem({ entry }: { entry: ExperienceEntry }) {
         </span>
         <span className={styles.entryDates}>{formatPeriod(entry.startDate, entry.endDate)}</span>
       </div>
-      {entry.description ? <div className={styles.entryDesc}>{entry.description}</div> : null}
+      {entry.description ? <div className={styles.entryDesc}><DescriptionContent text={entry.description} /></div> : null}
     </div>
   )
 }
@@ -59,7 +77,7 @@ function EducationItem({ entry }: { entry: EducationEntry }) {
         </span>
         <span className={styles.entryDates}>{formatPeriod(entry.startDate, entry.endDate)}</span>
       </div>
-      {entry.description ? <div className={styles.entryDesc}>{entry.description}</div> : null}
+      {entry.description ? <div className={styles.entryDesc}><DescriptionContent text={entry.description} /></div> : null}
     </div>
   )
 }
@@ -145,7 +163,7 @@ function ProjectItem({ project }: { project: ProjectEntry }) {
           ) : null}
         </span>
       </div>
-      {project.description ? <div className={styles.entryDesc}>{project.description}</div> : null}
+      {project.description ? <div className={styles.entryDesc}><DescriptionContent text={project.description} /></div> : null}
       {project.techStack.length > 0 ? (
         <div className={styles.techStack}>
           {project.techStack.map((tech, i) => (

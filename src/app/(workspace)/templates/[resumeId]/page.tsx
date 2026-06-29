@@ -19,6 +19,7 @@
  */
 
 import { use, useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
@@ -129,6 +130,7 @@ export default function TemplateGalleryPage({
 }) {
   const { resumeId } = use(params)
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORY)
   const [applyState, setApplyState] = useState<'idle' | 'success' | 'error'>('idle')
@@ -173,6 +175,8 @@ export default function TemplateGalleryPage({
         setApplyError('')
         queryClient.invalidateQueries({ queryKey: queryKeys.resume(resumeId) })
         queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
+        // Redirect back to the resume detail page
+        router.push(`/resumes/${resumeId}`)
       } else {
         setApplyState('error')
         setApplyError(result.message ?? 'Failed to apply template.')

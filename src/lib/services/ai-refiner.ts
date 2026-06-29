@@ -114,19 +114,19 @@ function buildResponseShape(scope: RefineScope): string {
   switch (scope.kind) {
     case 'all':
       return `{
-  "experience": [ { "title": "...", "organization": "...", "startDate": "...", "endDate": "...", "description": "..." }, ... ],
-  "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "..." }, ... ],
+  "experience": [ { "title": "...", "organization": "...", "startDate": "...", "endDate": "...", "description": "bullet 1\nbullet 2\nbullet 3" }, ... ],
+  "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "bullet 1\nbullet 2" }, ... ],
   "skills": [ "skill1", "skill2", ... ]
 }`
     case 'section':
       if (scope.section === 'experience') {
         return `{
-  "experience": [ { "title": "...", "organization": "...", "startDate": "...", "endDate": "...", "description": "..." }, ... ]
+  "experience": [ { "title": "...", "organization": "...", "startDate": "...", "endDate": "...", "description": "bullet 1\nbullet 2\nbullet 3" }, ... ]
 }`
       }
       if (scope.section === 'education') {
         return `{
-  "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "..." }, ... ]
+  "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "bullet 1\nbullet 2" }, ... ]
 }`
       }
       return `{
@@ -135,11 +135,11 @@ function buildResponseShape(scope: RefineScope): string {
     case 'entry':
       if (scope.section === 'experience') {
         return `{
-  "experience": [ { "title": "...", "organization": "...", "startDate": "...", "endDate": "...", "description": "..." } ]
+  "experience": [ { "title": "...", "organization": "...", "startDate": "...", "endDate": "...", "description": "bullet 1\nbullet 2\nbullet 3" } ]
 }`
       }
       return `{
-  "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "..." } ]
+  "education": [ { "institution": "...", "credential": "...", "startDate": "...", "endDate": "...", "description": "bullet 1\nbullet 2" } ]
 }`
     case 'summary':
       return `{
@@ -147,7 +147,7 @@ function buildResponseShape(scope: RefineScope): string {
 }`
     case 'project':
       return `{
-  "description": "A concise, impactful project description."
+  "description": "bullet 1\nbullet 2\nbullet 3"
 }`
   }
 }
@@ -220,11 +220,12 @@ ${roleContext}${contentSection}
 Instructions:
 1. Rewrite only text fields: titles, descriptions, credential names, and skill labels.
 2. Preserve ALL structural fields exactly as given: dates (startDate, endDate), organization names, institution names. Do NOT change these.
-3. Make descriptions action-oriented, quantified where possible, and free of clichés.
-4. Do NOT include LaTeX commands, markup, or formatting symbols in your output.
-5. Do NOT include contact information (name, email) in your output.
-6. Return ONLY a valid JSON object — no markdown fences, no code blocks, no commentary before or after.
-7. The JSON object must match exactly this shape:
+3. Write each description as short, punchy bullet points separated by newlines (\n). Each bullet should be one concise achievement or responsibility. Use 2-5 bullets per entry.
+4. Make each bullet action-oriented, starting with a strong verb, quantified where possible, and free of clichés.
+5. Do NOT include LaTeX commands, markup, or formatting symbols in your output.
+6. Do NOT include contact information (name, email) in your output.
+7. Return ONLY a valid JSON object — no markdown fences, no code blocks, no commentary before or after.
+8. The JSON object must match exactly this shape:
 
 ${responseShape}
 

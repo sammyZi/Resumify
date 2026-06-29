@@ -106,16 +106,25 @@ export function JobMatchModal({
         aria-label="Match resume to job description"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* ── Header ───────────────────────────────────────────────────── */}
         <div className={styles.header}>
-          <div>
-            <h2 className={styles.title}>Job match score</h2>
-            <p className={styles.subtitle}>{resumeName}</p>
+          <div className={styles.headerLeft}>
+            <div className={styles.headerIcon}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+            <div>
+              <h2 className={styles.title}>Job Match Score</h2>
+              <p className={styles.subtitle}>{resumeName}</p>
+            </div>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
-            ✕
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
+        {/* ── Job description input ────────────────────────────────────── */}
+        <label className={styles.inputLabel}>
+          Job Description
+          <span className={styles.inputHelper}>— paste the full posting below</span>
+        </label>
         <textarea
           className={styles.textarea}
           placeholder="Paste the full job description here…"
@@ -125,23 +134,39 @@ export function JobMatchModal({
           disabled={loading}
         />
 
+        {/* ── Action row ───────────────────────────────────────────────── */}
         <div className={styles.actionRow}>
           <button type="button" className={styles.analyzeBtn} onClick={analyze} disabled={loading}>
-            {loading ? 'Analyzing…' : result ? 'Re-analyze' : 'Analyze match'}
+            {loading ? (
+              <>
+                <span className={styles.spinner} />
+                Analyzing…
+              </>
+            ) : (
+              <>
+                <span className={styles.analyzeBtnIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                {result ? 'Re-analyze' : 'Analyze match'}
+              </>
+            )}
           </button>
           <span className={styles.charCount}>
             {jobDescription.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
           </span>
         </div>
 
+        {/* ── Error ────────────────────────────────────────────────────── */}
         {error && (
           <div className={styles.error} role="alert">
             {error}
           </div>
         )}
 
+        {/* ── Results ──────────────────────────────────────────────────── */}
         {result && (
           <div className={styles.result}>
+            <hr className={styles.divider} />
+
+            {/* Score card */}
             <div className={styles.scoreCard}>
               <div
                 className={styles.ring}
@@ -165,9 +190,13 @@ export function JobMatchModal({
               </div>
             </div>
 
+            {/* Matched keywords */}
             {result.matchedKeywords.length > 0 && (
               <div className={styles.block}>
-                <span className={styles.blockTitle}>Matched keywords</span>
+                <div className={styles.blockHeader}>
+                  <span className={`${styles.blockIcon} ${styles.blockIconMatched}`}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  <span className={styles.blockTitle}>Matched Keywords</span>
+                </div>
                 <div className={styles.chips}>
                   {result.matchedKeywords.map((k, i) => (
                     <span key={i} className={`${styles.chip} ${styles.chipMatched}`}>
@@ -178,9 +207,13 @@ export function JobMatchModal({
               </div>
             )}
 
+            {/* Missing keywords */}
             {result.missingKeywords.length > 0 && (
               <div className={styles.block}>
-                <span className={styles.blockTitle}>Missing keywords</span>
+                <div className={styles.blockHeader}>
+                  <span className={`${styles.blockIcon} ${styles.blockIconMissing}`}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                  <span className={styles.blockTitle}>Missing Keywords</span>
+                </div>
                 <div className={styles.chips}>
                   {result.missingKeywords.map((k, i) => (
                     <span key={i} className={`${styles.chip} ${styles.chipMissing}`}>
@@ -191,11 +224,15 @@ export function JobMatchModal({
               </div>
             )}
 
+            {/* Strengths & Gaps */}
             {(result.strengths.length > 0 || result.gaps.length > 0) && (
               <div className={styles.columns}>
                 {result.strengths.length > 0 && (
                   <div className={styles.block}>
-                    <span className={styles.blockTitle}>Strengths</span>
+                    <div className={styles.blockHeader}>
+                      <span className={`${styles.blockIcon} ${styles.blockIconStrength}`}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14Z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></span>
+                      <span className={styles.blockTitle}>Strengths</span>
+                    </div>
                     <ul className={styles.bullets}>
                       {result.strengths.map((s, i) => (
                         <li key={i}>{s}</li>
@@ -205,7 +242,10 @@ export function JobMatchModal({
                 )}
                 {result.gaps.length > 0 && (
                   <div className={styles.block}>
-                    <span className={styles.blockTitle}>Gaps</span>
+                    <div className={styles.blockHeader}>
+                      <span className={`${styles.blockIcon} ${styles.blockIconGap}`}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                      <span className={styles.blockTitle}>Gaps</span>
+                    </div>
                     <ul className={styles.bullets}>
                       {result.gaps.map((g, i) => (
                         <li key={i}>{g}</li>
@@ -216,9 +256,13 @@ export function JobMatchModal({
               </div>
             )}
 
+            {/* Suggestions */}
             {result.suggestions.length > 0 && (
               <div className={styles.block}>
-                <span className={styles.blockTitle}>Suggestions to improve your match</span>
+                <div className={styles.blockHeader}>
+                  <span className={`${styles.blockIcon} ${styles.blockIconSuggestion}`}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span>
+                  <span className={styles.blockTitle}>Suggestions to Improve Your Match</span>
+                </div>
                 <ul className={styles.bullets}>
                   {result.suggestions.map((s, i) => (
                     <li key={i}>{s}</li>

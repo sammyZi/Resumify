@@ -73,6 +73,16 @@ async function renameResume(id: string, title: string): Promise<void> {
   if (!res.ok) throw new Error('Failed to rename resume')
 }
 
+async function applyTemplateApi(resumeId: string, templateId: string): Promise<void> {
+  const res = await fetch(`/api/resumes/${resumeId}/template`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ templateId }),
+  })
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Unauthorized') }
+  if (!res.ok) throw new Error('Failed to apply template')
+}
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '—'
@@ -221,6 +231,16 @@ export default function DashboardPage() {
     onError: () => { addToast('Failed to rename resume.', 'error') },
   })
 
+  const templateMutation = useMutation({
+    mutationFn: ({ id, templateId }: { id: string; templateId: string }) => applyTemplateApi(id, templateId),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.resumes() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.resume(variables.id) })
+      addToast('Template applied.', 'success')
+    },
+    onError: () => { addToast('Failed to apply template.', 'error') },
+  })
+
   const count = resumes?.length ?? 0
 
   return (
@@ -315,9 +335,11 @@ export default function DashboardPage() {
                     )}
                     <CardMenu
                       resumeName={name}
+                      currentTemplateId={resume.templateId}
                       onShare={() => setShareTarget(resume)}
                       onRename={() => { setRenameTarget(resume) }}
                       onDelete={() => { setDeleteTarget(resume) }}
+                      onTemplate={(templateId) => templateMutation.mutate({ id: resume.id, templateId })}
                     />
                   </div>
                 </div>

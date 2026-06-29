@@ -216,21 +216,21 @@ export default function ResumeEditorPage({
         <h1 className={styles.pageTitle}>
           {resume.fullName ? `${resume.fullName}'s resume` : 'Edit resume'}
         </h1>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div className={styles.actionToolbar}>
           <PdfImportButton
             onImport={handlePdfImport}
             disabled={saveMutation.isPending}
           />
-          <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+          <button type="button" className={`${styles.button} ${styles.buttonSecondary}`}
             onClick={() => setMatchOpen(true)}>
-            Job match
+            <span className={styles.buttonIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> Job match
           </button>
-          <button type="button" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}
+          <button type="button" className={`${styles.button} ${styles.buttonSecondary}`}
             onClick={() => setShareOpen(true)}>
-            Share
+            <span className={styles.buttonIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span> Share
           </button>
-          <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`}>
-            Change template
+          <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary}`}>
+            <span className={styles.buttonIcon}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span> Template
           </Link>
         </div>
       </div>
@@ -253,50 +253,56 @@ export default function ResumeEditorPage({
         saveNotice={saveNotice}
       />
 
-      {/* ── Preview & Download ───────────────────────────────────────────── */}
-      <section className={styles.section} style={{ marginTop: '2rem' }}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Preview &amp; Download</h2>
+      {/* ── Action cards ─────────────────────────────────────────────── */}
+      <div className={styles.sectionGrid}>
+        {/* Preview & Download */}
+        <div className={styles.actionCard}>
+          <div className={styles.actionCardHeader}>
+            <span className={styles.actionCardIcon}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+            <span className={styles.actionCardTitle}>Preview &amp; Download</span>
+          </div>
+          <p className={styles.actionCardDesc}>
+            See your resume rendered in the selected template and download it as a PDF.
+            {!resume.templateId ? ' No template selected — Classic is used by default.' : ''}
+          </p>
+          <div className={styles.actionCardActions}>
+            <Link href={`/resumes/${id}/preview`} className={styles.button}>Preview &amp; download</Link>
+            <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary}`}>Choose template</Link>
+          </div>
         </div>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem' }}>
-          See your resume rendered in the selected template and download it as a PDF.
-          {!resume.templateId ? ' No template selected — Classic is used by default.' : ''}
-        </p>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-          <Link href={`/resumes/${id}/preview`} className={styles.button}>Preview &amp; download</Link>
-          <Link href={`/templates/${id}`} className={`${styles.button} ${styles.buttonSecondary}`}>Choose template</Link>
-        </div>
-      </section>
 
-      {/* ── Job match ────────────────────────────────────────────────────── */}
-      <section className={styles.section} style={{ marginTop: '2rem' }}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Tailor to a job</h2>
+        {/* Tailor to a job */}
+        <div className={styles.actionCard}>
+          <div className={styles.actionCardHeader}>
+            <span className={styles.actionCardIcon}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+            <span className={styles.actionCardTitle}>Tailor to a Job</span>
+          </div>
+          <p className={styles.actionCardDesc}>
+            Paste a job description to see how well this resume matches, your estimated
+            chance of selection, and what to improve.
+          </p>
+          <div className={styles.actionCardActions}>
+            <button type="button" className={styles.button} onClick={() => setMatchOpen(true)}>
+              Check job match
+            </button>
+          </div>
         </div>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem' }}>
-          Paste a job description to see how well this resume matches, your estimated
-          chance of selection, and what to improve.
-        </p>
-        <div style={{ marginTop: '0.5rem' }}>
-          <button type="button" className={styles.button} onClick={() => setMatchOpen(true)}>
-            Check job match
-          </button>
-        </div>
-      </section>
 
-      {/* ── Sharing ──────────────────────────────────────────────────────── */}
-      <div className={styles.section} style={{ marginTop: '2rem' }}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Sharing</h2>
-        </div>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem' }}>
-          Create recruiter or template links and manage existing ones.
-        </p>
-        <div style={{ marginTop: '0.5rem' }}>
-          <button type="button" className={`${styles.button} ${styles.buttonSecondary}`}
-            onClick={() => setShareOpen(true)}>
-            Manage share links
-          </button>
+        {/* Sharing */}
+        <div className={styles.actionCard}>
+          <div className={styles.actionCardHeader}>
+            <span className={styles.actionCardIcon}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+            <span className={styles.actionCardTitle}>Sharing</span>
+          </div>
+          <p className={styles.actionCardDesc}>
+            Create recruiter or template links and manage existing ones.
+          </p>
+          <div className={styles.actionCardActions}>
+            <button type="button" className={`${styles.button} ${styles.buttonSecondary}`}
+              onClick={() => setShareOpen(true)}>
+              Manage share links
+            </button>
+          </div>
         </div>
       </div>
 

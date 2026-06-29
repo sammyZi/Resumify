@@ -9,7 +9,7 @@
  * before downloading; selecting one persists it via PUT /api/resumes/:id/template.
  */
 
-import { use, useState } from 'react'
+import { use, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/components/query-provider'
@@ -61,6 +61,24 @@ export default function ResumePreviewPage({
   // Local override so switching templates updates the preview instantly while
   // the persistence request is in flight.
   const [selected, setSelected] = useState<string | null>(null)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!dropdownOpen) return
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setDropdownOpen(false)
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setDropdownOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [dropdownOpen])
 
   const applyMutation = useMutation({
     mutationFn: (templateId: string) => applyTemplate(id, templateId),
@@ -89,6 +107,7 @@ export default function ResumePreviewPage({
   }
 
   const activeTemplateId = selected ?? resume.templateId ?? getTemplateMeta(null).id
+  const activeMeta = getTemplateMeta(activeTemplateId)
 
   const data: ResumeData = {
     fullName: resume.fullName,
@@ -107,6 +126,7 @@ export default function ResumePreviewPage({
 
   function handleSelect(templateId: string) {
     setSelected(templateId)
+    setDropdownOpen(false)
     applyMutation.mutate(templateId)
   }
 
@@ -118,22 +138,51 @@ export default function ResumePreviewPage({
         </Link>
 
         <div className={styles.toolbar}>
-          <label className={workspace.label} htmlFor="template-select">
-            Template
-          </label>
-          <select
-            id="template-select"
-            className={workspace.input}
-            style={{ width: 'auto' }}
-            value={activeTemplateId}
-            onChange={(e) => handleSelect(e.target.value)}
-          >
-            {TEMPLATES.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name} — {t.roleCategory}
-              </option>
-            ))}
-          </select>
+          <label className={workspace.label}>Template</label>
+          <div className={styles.templatePicker} ref={dropdownRef}>
+            <button
+              type="button"
+              className={styles.templateTrigger}
+              onClick={() => setDropdownOpen((v) => !v)}
+              aria-haspopup="listbox"
+              aria-expanded={dropdownOpen}
+            >
+              <span className={styles.templateTriggerSwatch} style={{ background: activeMeta.accent }} />
+              {activeMeta.name}
+              <svg
+                width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                className={`${styles.templateTriggerChevron} ${dropdownOpen ? styles.templateTriggerChevronOpen : ''}`}
+              >
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+
+            {dropdownOpen && (
+              <ul className={styles.templateDropdown} role="listbox">
+                {TEMPLATES.map((t) => (
+                  <li key={t.id} role="none">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={t.id === activeTemplateId}
+                      className={`${styles.templateOption} ${t.id === activeTemplateId ? styles.templateOptionActive : ''}`}
+                      onClick={() => handleSelect(t.id)}
+                    >
+                      <span className={styles.templateOptionSwatch} style={{ background: t.accent }} />
+                      {t.name}
+                      <span className={styles.templateOptionCategory}>{t.roleCategory}</span>
+                      {t.id === activeTemplateId && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.templateOptionCheck}>
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <span className={styles.spacer} />
 

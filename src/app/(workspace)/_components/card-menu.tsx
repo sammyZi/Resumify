@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import { TEMPLATES } from '@/lib/templates/registry'
 import styles from './card-menu.module.css'
 
 function DotsIcon() {
@@ -22,14 +23,17 @@ function DotsIcon() {
 
 interface Props {
   resumeName: string
+  currentTemplateId?: string | null
   onShare: () => void
   onRename: () => void
   onDelete: () => void
+  onTemplate?: (templateId: string) => void
   isSharing?: boolean
 }
 
-export function CardMenu({ resumeName, onShare, onRename, onDelete, isSharing }: Props) {
+export function CardMenu({ resumeName, currentTemplateId, onShare, onRename, onDelete, onTemplate, isSharing }: Props) {
   const [open, setOpen] = useState(false)
+  const [templateOpen, setTemplateOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -52,6 +56,7 @@ export function CardMenu({ resumeName, onShare, onRename, onDelete, isSharing }:
     e.preventDefault()
     e.stopPropagation()
     setOpen(false)
+    setTemplateOpen(false)
     fn()
   }
 
@@ -59,6 +64,7 @@ export function CardMenu({ resumeName, onShare, onRename, onDelete, isSharing }:
     e.preventDefault()
     e.stopPropagation()
     setOpen((v) => !v)
+    setTemplateOpen(false)
   }
 
   return (
@@ -108,6 +114,46 @@ export function CardMenu({ resumeName, onShare, onRename, onDelete, isSharing }:
               Rename
             </button>
           </li>
+          {onTemplate && (
+            <li role="none">
+              <button
+                type="button"
+                className={styles.item}
+                role="menuitem"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setTemplateOpen((v) => !v) }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+                </svg>
+                Template
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {templateOpen && (
+                <ul className={styles.submenu} role="menu">
+                  {TEMPLATES.map((t) => (
+                    <li key={t.id} role="none">
+                      <button
+                        type="button"
+                        className={`${styles.item} ${t.id === currentTemplateId ? styles.itemActive : ''}`}
+                        role="menuitem"
+                        onClick={(e) => handle(e, () => onTemplate(t.id))}
+                      >
+                        <span className={styles.templateSwatch} style={{ background: t.accent }} />
+                        {t.name}
+                        {t.id === currentTemplateId && (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}>
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          )}
           <li role="none">
             <div className={styles.divider} />
           </li>

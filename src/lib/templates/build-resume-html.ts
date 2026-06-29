@@ -59,6 +59,16 @@ function linkIcon(type: string): string {
   return icon('globe')
 }
 
+/** Render a description: if it contains newlines, output a bullet list; otherwise plain text. */
+function descriptionHtml(text: string): string {
+  const lines = text.split(/\n/).map((l) => l.trim()).filter(Boolean)
+  if (lines.length <= 1) {
+    return `<div style="margin-top:3px;font-size:10pt;color:#374151">${esc(text)}</div>`
+  }
+  const items = lines.map((l) => `<li style="margin-bottom:2px">${esc(l)}</li>`).join('')
+  return `<ul style="margin-top:3px;padding-left:18px;font-size:10pt;color:#374151">${items}</ul>`
+}
+
 // ─── Section builders ──────────────────────────────────────────────────────────
 
 function contactRow(data: ResumeData, accent: string): string {
@@ -98,7 +108,7 @@ function entryHtml(
       <span style="font-weight:600;font-size:11pt">${esc(title)}${sub ? `<span style="color:#374151;font-weight:400"> · ${esc(sub)}</span>` : ''}</span>
       ${dates ? `<span style="color:#6b7280;font-size:9.5pt;white-space:nowrap">${esc(dates)}</span>` : ''}
     </div>
-    ${description ? `<div style="margin-top:3px;font-size:10pt;color:#374151;white-space:pre-wrap">${esc(description)}</div>` : ''}
+    ${description ? descriptionHtml(description) : ''}
   </div>`
 }
 
@@ -128,7 +138,7 @@ function projectsSection(projects: ProjectEntry[], accent: string): string {
         <span style="font-weight:600;font-size:11pt">${esc(p.name || 'Project')}</span>
         ${linkParts.length ? `<span style="display:flex;gap:12px">${linkParts.join('')}</span>` : ''}
       </div>
-      ${p.description ? `<div style="margin-top:3px;font-size:10pt;color:#374151">${esc(p.description)}</div>` : ''}
+      ${p.description ? descriptionHtml(p.description) : ''}
       ${tech}
     </div>`
   }).join('')
