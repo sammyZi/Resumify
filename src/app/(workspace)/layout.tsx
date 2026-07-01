@@ -15,7 +15,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 import { isDemoMode, disableDemoMode } from '@/lib/demo/demo-mode'
-import { clearDemoData } from '@/lib/demo/demo-db'
 import { BrandLogo } from '@/components/brand-logo'
 import { ToastContainer } from './_components/toast'
 import { ThemeToggle } from './_components/theme-toggle'
@@ -120,9 +119,10 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
   async function handleSignOut() {
     setSigningOut(true)
-    // In demo mode there is no server session — just clear local data and leave.
+    // In demo mode there is no server session. Keep the locally-stored demo data
+    // (IndexedDB persists) so re-entering the demo restores previous work — just
+    // turn demo mode off and return to the landing page.
     if (isDemoMode()) {
-      await clearDemoData()
       disableDemoMode()
       router.replace('/')
       return
