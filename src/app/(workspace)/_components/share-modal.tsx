@@ -9,6 +9,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import type { Share } from '@/lib/types'
+import { isDemoMode } from '@/lib/demo/demo-mode'
 import styles from './share-modal.module.css'
 
 type ShareKind = 'recruiter' | 'template'
@@ -35,6 +36,7 @@ export function ShareModal({
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [demo] = useState(() => isDemoMode())
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -56,7 +58,7 @@ export function ShareModal({
     }
   }, [resumeId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { if (!demo) load() }, [load, demo])
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -121,6 +123,21 @@ export function ShareModal({
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">✕</button>
         </div>
 
+        {demo ? (
+          <div className={styles.demoNotice} role="note">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <p className={styles.demoNoticeTitle}>Sharing needs an account</p>
+            <p className={styles.demoNoticeText}>
+              Share links are hosted on your account so recruiters can open them. Create a
+              free account to generate recruiter and template links.
+            </p>
+            <a href="/sign-up" className={styles.createBtn}>Sign up to share</a>
+          </div>
+        ) : (
+        <>
         <div className={styles.createRow}>
           <button type="button" className={styles.createBtn} onClick={() => createShare('recruiter')} disabled={creating !== null}>
             {creating === 'recruiter' ? 'Creating…' : '+ Recruiter link'}
@@ -185,6 +202,8 @@ export function ShareModal({
             })
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   )

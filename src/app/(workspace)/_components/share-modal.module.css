@@ -182,3 +182,38 @@
 }
 
 .revokeBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Demo notice ─────────────────────────────────────────────────────────── */
+
+.demoNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.demoNotice svg {
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.demoNoticeTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.demoNoticeText {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  max-width: 22rem;
+  margin-bottom: 0.75rem;
+}
+
+.demoNotice .createBtn {
+  text-decoration: none;
+  text-align: center;
+}

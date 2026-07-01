@@ -18,56 +18,62 @@ import type { NextRequest } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getResume } from '@/lib/stores/resume-store'
 import { matchJob } from '@/lib/services/job-matcher'
+import type { ResumeData } from '@/lib/types'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isDemo = request.headers.get('x-demo-mode') === '1'
+
   // ── 1. Auth ──────────────────────────────────────────────────────────────
   const supabase = await createSupabaseServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (!user && !isDemo) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const { id } = await params
 
-  // ── 2. Load resume (ownership enforced by RLS) ─────────────────────────────
-  const resumeResult = await getResume(id)
-
-  if (!resumeResult.ok) {
-    if (resumeResult.error.kind === 'not_found') {
-      return Response.json({ error: 'Not found' }, { status: 404 })
-    }
-    return Response.json(
-      { error: 'job_match_failed', message: 'Failed to load resume' },
-      { status: 500 }
-    )
-  }
-
-  const resume = resumeResult.value
-
-  // ── 3. Parse body ──────────────────────────────────────────────────────────
+  // ── 2. Parse body ──────────────────────────────────────────────────────────
   const body = await request.json().catch(() => ({}))
   const jobDescription = typeof body?.jobDescription === 'string' ? body.jobDescription : ''
+  const clientData = body?.data as ResumeData | undefined
 
-  // ── 4. Run the matcher ─────────────────────────────────────────────────────
-  const resumeData = {
-    fullName: resume.fullName,
-    email: resume.email,
-    phone: resume.phone,
-    location: resume.location,
-    summary: resume.summary,
-    links: resume.links,
-    experience: resume.experience,
-    projects: resume.projects,
-    education: resume.education,
-    certifications: resume.certifications,
-    skills: resume.skills,
-    achievements: resume.achievements,
+  // ── 3. Resolve resume data (demo: from body; otherwise from DB) ────────────
+  let resumeData: ResumeData
+
+  if (isDemo && clientData && typeof clientData === 'object') {
+    resumeData = clientData
+  } else {
+    const resumeResult = await getResume(id)
+    if (!resumeResult.ok) {
+      if (resumeResult.error.kind === 'not_found') {
+        return Response.json({ error: 'Not found' }, { status: 404 })
+      }
+      return Response.json(
+        { error: 'job_match_failed', message: 'Failed to load resume' },
+        { status: 500 }
+      )
+    }
+    const resume = resumeResult.value
+    resumeData = {
+      fullName: resume.fullName,
+      email: resume.email,
+      phone: resume.phone,
+      location: resume.location,
+      summary: resume.summary,
+      links: resume.links,
+      experience: resume.experience,
+      projects: resume.projects,
+      education: resume.education,
+      certifications: resume.certifications,
+      skills: resume.skills,
+      achievements: resume.achievements,
+    }
   }
 
   const matchResult = await matchJob({ resumeData, jobDescription })

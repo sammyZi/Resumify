@@ -223,6 +223,7 @@ const share = await createShareToken({
             <a href="#features" className={styles.navLink} onClick={(e) => scrollToSection(e, 'features')}>FEATURES</a>
             <a href="#workflow" className={styles.navLink} onClick={(e) => scrollToSection(e, 'workflow')}>HOW IT WORKS</a>
             <a href="https://github.com/sammyZi/Resumify" target="_blank" rel="noopener noreferrer" className={styles.navLink}>OPEN SOURCE</a>
+            <Link href="/demo" className={styles.navLink}>DEMO</Link>
             <a href="#contact" className={styles.navLink} onClick={(e) => scrollToSection(e, 'contact')}>CONTACT</a>
           </div>
 
@@ -264,6 +265,12 @@ const share = await createShareToken({
                 </svg>
                 OPEN SOURCE
               </a>
+              <Link href="/demo" className={styles.btnSecondary}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ marginRight: 6, verticalAlign: '-3px' }}>
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                TRY DEMO
+              </Link>
             </div>
           </div>
         </section>

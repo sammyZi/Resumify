@@ -11,6 +11,7 @@
 
 import { useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { installDemoFetch } from '@/lib/demo/demo-fetch'
 
 // ─── Canonical query keys ─────────────────────────────────────────────────────
 
@@ -44,7 +45,12 @@ export default function QueryProvider({
 }) {
   // useState ensures a stable QueryClient instance across re-renders without
   // accidentally sharing state between different users/requests on the server.
-  const [queryClient] = useState(makeQueryClient)
+  // Installing the demo fetch interceptor here guarantees it is active before
+  // any page fires its first query.
+  const [queryClient] = useState(() => {
+    installDemoFetch()
+    return makeQueryClient()
+  })
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

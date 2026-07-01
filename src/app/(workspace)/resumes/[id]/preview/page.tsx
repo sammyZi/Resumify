@@ -16,6 +16,7 @@ import { queryKeys } from '@/components/query-provider'
 import type { Resume, ResumeData } from '@/lib/types'
 import { TEMPLATES, getTemplateMeta } from '@/lib/templates/registry'
 import { ResumeDocument } from '@/lib/templates/resume-document'
+import { isDemoMode } from '@/lib/demo/demo-mode'
 import workspace from '../../../_components/workspace-ui.module.css'
 import styles from './preview.module.css'
 
@@ -189,8 +190,33 @@ export default function ResumePreviewPage({
           <button
             type="button"
             className={workspace.button}
-            onClick={() => {
-              window.open(`/api/resumes/${id}/pdf`, '_blank', 'noopener,noreferrer')
+            onClick={async () => {
+              if (isDemoMode()) {
+                // Demo: no server-side resume, so POST the locally-stored data
+                // and download the generated PDF blob.
+                try {
+                  const res = await fetch(`/api/resumes/${id}/pdf`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-demo-mode': '1' },
+                    body: JSON.stringify({ data, templateId: activeTemplateId }),
+                  })
+                  if (!res.ok) throw new Error('Failed to generate PDF')
+                  const blob = await res.blob()
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${(resume.fullName || 'resume').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`
+                  document.body.appendChild(a)
+                  a.click()
+                  a.remove()
+                  URL.revokeObjectURL(url)
+                } catch {
+                  // Fall back to browser print if PDF generation fails.
+                  window.print()
+                }
+              } else {
+                window.open(`/api/resumes/${id}/pdf`, '_blank', 'noopener,noreferrer')
+              }
             }}
           >
             Download PDF

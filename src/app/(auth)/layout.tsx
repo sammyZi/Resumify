@@ -1,4 +1,5 @@
 import styles from './_components/auth-layout.module.css'
+import { ExitDemo } from './_components/exit-demo'
 
 /**
  * AuthLayout — shared shell for the authentication route group.
@@ -16,6 +17,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className={styles.shell}>
+      <ExitDemo />
       <aside className={styles.brand} aria-hidden="true">
         <div className={styles.brandInner}>
           <span className={styles.brandMark}>Resumify</span>

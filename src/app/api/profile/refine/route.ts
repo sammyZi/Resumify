@@ -27,10 +27,13 @@ import { refine } from '@/lib/services/ai-refiner'
 import type { ResumeData } from '@/lib/types'
 
 export async function POST(request: NextRequest) {
+  const isDemo = request.headers.get('x-demo-mode') === '1'
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  // Demo mode is stateless: it always supplies `data` in the body, so no session
+  // is required. Non-demo requests still require authentication.
+  if (!user && !isDemo) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
 
   let resumeData: ResumeData | null = null
 
-  // 1. Prefer data sent from the client (works before first save).
+  // 1. Prefer data sent from the client (works before first save, and in demo).
   if (clientData && typeof clientData === 'object') {
     resumeData = {
       fullName:       clientData.fullName       ?? '',
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
       skills:         clientData.skills         ?? [],
       achievements:   clientData.achievements   ?? [],
     }
-  } else {
+  } else if (user) {
     // 2. Fall back to the saved profile.
     const profileResult = await getProfile(user.id)
     if (!profileResult.ok) {
@@ -80,6 +83,13 @@ export async function POST(request: NextRequest) {
       skills:         p.skills,
       achievements:   p.achievements,
     }
+  }
+
+  if (!resumeData) {
+    return Response.json(
+      { error: 'refinement_failed', message: 'No profile data found. Fill in the form and try again.' },
+      { status: 400 }
+    )
   }
 
   const result = await refine({ resumeData, scope })

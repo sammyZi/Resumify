@@ -14,6 +14,8 @@ import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
+import { isDemoMode, disableDemoMode } from '@/lib/demo/demo-mode'
+import { clearDemoData } from '@/lib/demo/demo-db'
 import { BrandLogo } from '@/components/brand-logo'
 import { ToastContainer } from './_components/toast'
 import { ThemeToggle } from './_components/theme-toggle'
@@ -104,6 +106,13 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const [confirmSignOut, setConfirmSignOut] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const [demo, setDemo] = useState(false)
+
+  // Detect demo mode on the client (localStorage) after mount to avoid a
+  // hydration mismatch.
+  useEffect(() => {
+    setDemo(isDemoMode())
+  }, [pathname])
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + '/')
@@ -111,6 +120,13 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
   async function handleSignOut() {
     setSigningOut(true)
+    // In demo mode there is no server session — just clear local data and leave.
+    if (isDemoMode()) {
+      await clearDemoData()
+      disableDemoMode()
+      router.replace('/')
+      return
+    }
     const supabase = createSupabaseBrowserClient()
     await supabase.auth.signOut()
     router.replace('/login')
@@ -119,6 +135,15 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
   return (
     <div className={styles.shell}>
+      {demo && (
+        <div className={styles.demoBar} role="status">
+          <span className={styles.demoBarDot} aria-hidden="true" />
+          <span className={styles.demoBarText}>
+            <strong>Demo mode</strong> — your data is saved only in this browser.
+          </span>
+          <Link href="/sign-up" className={styles.demoBarLink}>Sign up to save</Link>
+        </div>
+      )}
       <nav className={styles.nav} aria-label="Main navigation">
         <Link href="/resumes" className={styles.navBrand}>
           <span className={styles.navBrandMark}>

@@ -1392,3 +1392,47 @@
     padding-inline: 0.5rem;
   }
 }
+
+/* ─── Demo mode banner ───────────────────────────────────────────────────── */
+
+.demoBar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+  flex-wrap: wrap;
+}
+
+.demoBarDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  animation: demoPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes demoPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.demoBarText {
+  min-width: 0;
+}
+
+.demoBarLink {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--color-primary-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.demoBarLink:hover {
+  opacity: 0.85;
+}

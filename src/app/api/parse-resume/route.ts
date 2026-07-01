@@ -175,13 +175,14 @@ function parseAIResponse(raw: string): ResumeData | null {
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
-  // ── Auth check ──────────────────────────────────────────────────────────────
+  // ── Auth check (demo mode bypasses; it has no session) ──────────────────────
+  const isDemo = request.headers.get('x-demo-mode') === '1'
   const supabase = await createSupabaseServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (!user && !isDemo) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

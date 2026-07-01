@@ -345,7 +345,13 @@ export function JobMatchModal({
                       {tailoring ? (
                         <><span className={styles.spinner} /> Tailoring…</>
                       ) : (
-                        '✨ Tailor resume'
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M9.94 2.5 12 7l5.06 2.07-5.06 2.06L9.94 17l-2.07-5.13L2 9.07 7.87 7z" />
+                            <path d="M16.8 15.1 18 18l3 1.2L18 20.4l-1.2 2.9-1.2-2.9L12.6 19.2l3-1.2z" />
+                          </svg>
+                          Tailor resume
+                        </>
                       )}
                     </button>
                     {tailorError && <p className={styles.error}>{tailorError}</p>}
